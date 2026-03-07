@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuentas — Design Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --white: #FFFFFF;
+  --bg: #F4F4F6;
+  --card: #FFFFFF;
+  --border: #EFEFEF;
+  --border2: #E8E8E8;
+
+  --ink: #0F0F14;
+  --ink2: #5A5A6E;
+  --ink3: #A0A0B0;
+
+  --green: #00C07F;
+  --green-bg: #E6FAF3;
+  --red: #FF4060;
+  --red-bg: #FFF0F3;
+  --blue: #3B82F6;
+  --blue-bg: #EEF4FF;
+  --amber: #F59E0B;
+  --amber-bg: #FFFBEB;
+  --purple: #8B5CF6;
+  --purple-bg: #F3EEFF;
+  --teal: #06B6D4;
+  --teal-bg: #ECFEFF;
+  --rose: #F43F5E;
+  --rose-bg: #FFF1F2;
+
+  --r: 22px;
+  --r-sm: 14px;
+  --r-xs: 10px;
+  --r-pill: 100px;
+
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+body {
+  background: #E2E2E8;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 32px 16px 48px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* ─── PHONE SHELL ─── */
+.scene { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.screen-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.phone {
+  width: 375px;
+  height: 812px;
+  background: var(--white);
+  border-radius: 48px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(255,255,255,0.5);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Status bar */
+.status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px 0;
+  flex-shrink: 0;
+}
+.status-time {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-icons span { font-size: 13px; color: var(--ink); }
+
+/* Scrollable area */
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 0 20px 100px;
+}
+.scroll::-webkit-scrollbar { display: none; }
+
+/* Bottom nav */
+.nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 90px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px 24px;
+  z-index: 10;
+}
+.nav-tab {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  padding: 6px 18px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background 0.15s;
+}
+.nav-tab:hover { background: var(--bg); }
+.nav-icon { font-size: 22px; line-height: 1; }
+.nav-lbl {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink3);
+}
+.nav-tab.on .nav-lbl { color: var(--ink); }
+.nav-tab.on .nav-icon { filter: none; }
+.nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ink); margin-top: 2px; }
+
+.fab-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  margin-top: -28px;
+}
+.fab {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(15,15,20,0.30);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fab:hover { transform: scale(1.06); box-shadow: 0 10px 28px rgba(15,15,20,0.36); }
+.fab svg { width: 24px; height: 24px; stroke: white; stroke-width: 2.5; fill: none; }
+.fab-lbl {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink3);
+}
+
+/* ─── TYPOGRAPHY ─── */
+.h1 { font-family:'Nunito',sans-serif; font-size:36px; font-weight:900; color:var(--ink); letter-spacing:-1px; line-height:1.05; }
+.h2 { font-family:'Nunito',sans-serif; font-size:22px; font-weight:800; color:var(--ink); }
+.h3 { font-family:'Nunito',sans-serif; font-size:16px; font-weight:700; color:var(--ink); }
+.label { font-size:12px; font-weight:500; color:var(--ink3); }
+.label-bold { font-family:'Nunito',sans-serif; font-size:12px; font-weight:700; color:var(--ink2); }
+
+/* ─── UTILITIES ─── */
+.row { display:flex; align-items:center; }
+.between { justify-content:space-between; }
+.gap4 { gap:4px; } .gap8 { gap:8px; } .gap12 { gap:12px; }
+.mt4{margin-top:4px;} .mt8{margin-top:8px;} .mt12{margin-top:12px;} .mt16{margin-top:16px;} .mt20{margin-top:20px;} .mt24{margin-top:24px;}
+.pill {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 10px; border-radius:var(--r-pill);
+  font-family:'Nunito',sans-serif; font-size:12px; font-weight:700;
+}
+.pill-green { background:var(--green-bg); color:var(--green); }
+.pill-red   { background:var(--red-bg);   color:var(--red); }
+.pill-purple{ background:var(--purple-bg); color:var(--purple); }
+.pill-blue  { background:var(--blue-bg);  color:var(--blue); }
+.pill-amber { background:var(--amber-bg); color:var(--amber); }
+
+/* ─── CARD ─── */
+.card {
+  background:var(--card);
+  border-radius:var(--r);
+  border:1px solid var(--border);
+  padding:20px;
+}
+.card-sm { border-radius:var(--r-sm); padding:16px; }
+.card-flat { box-shadow:none; }
+
+/* Section row */
+.sec-row {
+  display:flex; align-items:center; justify-content:space-between;
+  margin: 20px 0 12px;
+}
+.sec-title { font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; color:var(--ink); }
+.sec-link  { font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:var(--blue); cursor:pointer; }
+
+/* ══════════════════════════════
+   HOME SCREEN
+══════════════════════════════ */
+.home-header {
+  padding: 16px 0 0;
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:20px;
+}
+.avatar {
+  width:40px; height:40px; border-radius:50%;
+  background: linear-gradient(135deg,#8B5CF6,#3B82F6);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; color:white;
+}
+.greet-sub { font-size:12px; color:var(--ink3); font-weight:500; }
+.greet-name { font-family:'Nunito',sans-serif; font-size:18px; font-weight:800; color:var(--ink); }
+.notif-btn {
+  width:40px; height:40px; border-radius:50%;
+  background:var(--bg); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; cursor:pointer; position:relative;
+}
+.notif-badge {
+  position:absolute; top:8px; right:8px;
+  width:8px; height:8px; border-radius:50%;
+  background:var(--red); border:2px solid white;
+}
+
+/* Hero balance */
+.hero {
+  background: var(--ink);
+  border-radius: 28px;
+  padding: 28px 24px 24px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content:'';
+  position:absolute; top:-50px; right:-30px;
+  width:200px; height:200px; border-radius:50%;
+  background:rgba(255,255,255,0.04);
+  pointer-events:none;
+}
+.hero::after {
+  content:'';
+  position:absolute; bottom:-80px; left:-20px;
+  width:180px; height:180px; border-radius:50%;
+  background:rgba(255,255,255,0.025);
+  pointer-events:none;
+}
+.hero-lbl { font-size:12px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; }
+.hero-amount {
+  font-family:'Nunito',sans-serif;
+  font-size:52px; font-weight:900;
+  color:white; letter-spacing:-2.5px; line-height:1;
+  margin-bottom:4px;
+}
+.hero-period { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:20px; }
+.hero-divider { height:1px; background:rgba(255,255,255,0.08); margin:0 0 18px; }
+.hero-stats { display:flex; gap:0; }
+.hero-stat { flex:1; }
+.hero-stat:not(:last-child) { border-right:1px solid rgba(255,255,255,0.08); padding-right:16px; margin-right:16px; }
+.hero-stat-lbl { font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:5px; }
+.hero-stat-row { display:flex; align-items:center; gap:6px; }
+.hero-stat-val { font-family:'Nunito',sans-serif; font-size:17px; font-weight:800; }
+.hv-green { color:#4ADE80; }
+.hv-red   { color:#FB7185; }
+.hero-dot { width:6px; height:6px; border-radius:50%; }
+.hd-green { background:#4ADE80; }
+.hd-red   { background:#FB7185; }
+
+/* Quick actions */
+.quick-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  margin-bottom:4px;
+}
+.quick-card {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px;
+  cursor:pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.quick-card:hover { transform:translateY(-1px); box-shadow:var(--shadow); }
+.quick-icon {
+  width:38px; height:38px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; margin-bottom:10px;
+}
+.quick-name { font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:var(--ink); margin-bottom:2px; }
+.quick-sub  { font-size:11px; color:var(--ink3); }
+
+/* Transaction list */
+.tx-card {
+  background:white;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+}
+.tx-item {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 18px;
+  cursor:pointer;
+  transition:background 0.12s;
+}
+.tx-item:not(:last-child) { border-bottom:1px solid var(--border); }
+.tx-item:hover { background:var(--bg); }
+.tx-ico {
+  width:44px; height:44px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+.tx-body { flex:1; min-width:0; }
+.tx-name { font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:var(--ink); }
+.tx-meta { font-size:12px; color:var(--ink3); margin-top:1px; }
+.tx-right { text-align:right; }
+.tx-amt { font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; }
+.amt-red { color:var(--red); }
+.amt-green { color:var(--green); }
+.tx-date { font-size:11px; color:var(--ink3); margin-top:2px; }
+
+/* ══════════════════════════════
+   CAJITAS SCREEN
+══════════════════════════════ */
+.cajitas-header { padding:16px 0 4px; }
+.cajitas-total-lbl { font-size:12px; color:var(--ink3); font-weight:500; margin-bottom:3px; }
+.cajitas-total-val { font-family:'Nunito',sans-serif; font-size:32px; font-weight:900; color:var(--ink); letter-spacing:-1px; }
+
+.cajita-card {
+  border-radius:24px;
+  padding:20px;
+  margin-bottom:12px;
+  position:relative; overflow:hidden;
+  cursor:pointer;
+  transition: transform 0.12s;
+}
+.cajita-card:hover { transform:translateY(-1px); }
+.cajita-bg-circle {
+  position:absolute; top:-30px; right:-30px;
+  width:130px; height:130px; border-radius:50%;
+  background:rgba(255,255,255,0.18);
+  pointer-events:none;
+}
+.cajita-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+.cajita-icon-wrap {
+  width:46px; height:46px; border-radius:14px;
+  background:rgba(255,255,255,0.25);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px;
+}
+.cajita-badge {
+  background:rgba(255,255,255,0.25);
+  color:white;
+  font-family:'Nunito',sans-serif; font-size:11px; font-weight:700;
+  padding:4px 10px; border-radius:var(--r-pill);
+}
+.cajita-name { font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:rgba(255,255,255,0.75); margin-bottom:2px; }
+.cajita-acc { font-family:'Nunito',sans-serif; font-size:26px; font-weight:900; color:white; letter-spacing:-1px; margin-bottom:14px; }
+.cajita-bar-bg { height:6px; border-radius:100px; background:rgba(255,255,255,0.25); overflow:hidden; }
+.cajita-bar-fill { height:6px; border-radius:100px; background:rgba(255,255,255,0.85); }
+.cajita-footer { display:flex; justify-content:space-between; margin-top:10px; }
+.cajita-foot-txt { font-size:11px; color:rgba(255,255,255,0.55); }
+.cajita-foot-val { font-family:'Nunito',sans-serif; font-size:11px; font-weight:700; color:rgba(255,255,255,0.85); }
+
+.cajita-alert {
+  border-radius:24px; padding:20px;
+  margin-bottom:12px;
+  background:#FFF0F3; border:2px solid #FFD6DE;
+  cursor:pointer;
+}
+.cajita-alert-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+.cajita-alert-ico { width:46px; height:46px; border-radius:14px; background:var(--red-bg); display:flex; align-items:center; justify-content:center; font-size:22px; }
+.cajita-alert-badge { background:var(--red-bg); color:var(--red); font-family:'Nunito',sans-serif; font-size:11px; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); }
+.cajita-alert-name { font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:var(--ink2); margin-bottom:2px; }
+.cajita-alert-acc { font-family:'Nunito',sans-serif; font-size:26px; font-weight:900; color:var(--red); letter-spacing:-1px; margin-bottom:14px; }
+.cajita-alert-bar-bg { height:6px; border-radius:100px; background:#FFD6DE; overflow:hidden; }
+.cajita-alert-bar-fill { height:6px; border-radius:100px; background:var(--red); }
+.cajita-alert-footer { display:flex; justify-content:space-between; margin-top:10px; }
+.cajita-alert-ft { font-size:11px; color:var(--ink3); }
+.cajita-alert-fv { font-family:'Nunito',sans-serif; font-size:11px; font-weight:700; color:var(--red); }
+
+/* ══════════════════════════════
+   ANALYTICS SCREEN
+══════════════════════════════ */
+.analytics-header { padding:16px 0 4px; }
+.period-tabs {
+  display:flex; background:#F4F4F6;
+  border-radius:var(--r-pill); padding:4px; gap:2px; margin:12px 0 20px;
+}
+.ptab {
+  flex:1; text-align:center; padding:8px;
+  border-radius:var(--r-pill);
+  font-family:'Nunito',sans-serif; font-size:13px; font-weight:700;
+  color:var(--ink3); cursor:pointer; transition:all 0.15s;
+}
+.ptab.on { background:white; color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+
+/* Donut chart */
+.donut-wrap { display:flex; flex-direction:column; align-items:center; gap:20px; padding:4px 0 8px; }
+.donut-container { position:relative; width:192px; height:192px; }
+.donut-svg { width:192px; height:192px; transform:rotate(-90deg); }
+.donut-center {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center; pointer-events:none;
+}
+.donut-c-amt { font-family:'Nunito',sans-serif; font-size:22px; font-weight:900; color:var(--ink); letter-spacing:-0.5px; }
+.donut-c-lbl { font-size:11px; color:var(--ink3); font-weight:500; }
+
+.legend { width:100%; }
+.leg-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0;
+  cursor:pointer; transition:opacity 0.12s;
+}
+.leg-item:not(:last-child) { border-bottom:1px solid var(--border); }
+.leg-item:hover { opacity:0.75; }
+.leg-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.leg-name { flex:1; font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:var(--ink); }
+.leg-right { text-align:right; }
+.leg-amt { font-family:'Nunito',sans-serif; font-size:13px; font-weight:800; color:var(--ink); }
+.leg-pct { font-size:11px; color:var(--ink3); }
+
+/* Bar chart */
+.bars-area { display:flex; align-items:flex-end; justify-content:space-between; gap:4px; height:90px; }
+.bar-col { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+.bar-pair { display:flex; gap:3px; align-items:flex-end; width:100%; justify-content:center; }
+.bar { border-radius:6px 6px 0 0; width:13px; }
+.bar-lbl { font-size:10px; color:var(--ink3); font-weight:600; font-family:'Nunito',sans-serif; }
+.bar-legend { display:flex; gap:16px; justify-content:center; margin-top:12px; }
+.bar-leg-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink3); font-family:'Nunito',sans-serif; font-weight:700; }
+.bar-leg-dot { width:8px; height:8px; border-radius:2px; }
+
+/* ══════════════════════════════
+   CARDS SCREEN
+══════════════════════════════ */
+.cards-header { padding:16px 0 4px; }
+
+.credit-card {
+  border-radius:24px;
+  padding:24px 22px 20px;
+  margin-bottom:12px;
+  position:relative; overflow:hidden;
+  cursor:pointer;
+  height:180px;
+}
+.cc-noise {
+  position:absolute; inset:0; border-radius:24px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.cc-chip { font-size:22px; margin-bottom:20px; }
+.cc-bank { font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; opacity:0.6; margin-bottom:4px; }
+.cc-name { font-family:'Nunito',sans-serif; font-size:18px; font-weight:900; color:white; }
+.cc-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:16px; }
+.cc-num { font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:rgba(255,255,255,0.55); letter-spacing:2px; }
+.cc-balance { text-align:right; }
+.cc-bal-lbl { font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:2px; }
+.cc-bal-amt { font-family:'Nunito',sans-serif; font-size:18px; font-weight:900; color:white; letter-spacing:-0.5px; }
+
+.cc-info-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.cc-info-card {
+  background:white; border:1px solid var(--border); border-radius:14px; padding:14px;
+}
+.cc-info-lbl { font-size:11px; color:var(--ink3); font-weight:500; margin-bottom:4px; }
+.cc-info-val { font-family:'Nunito',sans-serif; font-size:17px; font-weight:800; color:var(--ink); }
+.cc-info-sub { font-size:11px; color:var(--ink3); margin-top:2px; }
+
+/* MSI item */
+.msi-item {
+  background:white; border:1px solid var(--border); border-radius:16px; padding:16px;
+  margin-bottom:10px; cursor:pointer; display:flex; gap:12px; align-items:center;
+}
+.msi-icon { width:44px; height:44px; border-radius:13px; background:var(--purple-bg); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.msi-body { flex:1; min-width:0; }
+.msi-name { font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+.msi-meta { font-size:12px; color:var(--ink3); }
+.msi-right { text-align:right; flex-shrink:0; }
+.msi-amt { font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; color:var(--purple); }
+.msi-left { font-size:11px; color:var(--ink3); margin-top:2px; }
+
+/* ══════════════════════════════
+   SPLITS SCREEN
+══════════════════════════════ */
+.split-header { padding:16px 0 4px; }
+.split-item {
+  background:white; border:1px solid var(--border); border-radius:18px; padding:16px 18px;
+  margin-bottom:10px; cursor:pointer;
+}
+.split-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.contact-avatar {
+  width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; color:white;
+  flex-shrink:0;
+}
+.split-name { font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:var(--ink); }
+.split-tx-name { font-size:12px; color:var(--ink3); }
+.split-bottom { display:flex; justify-content:space-between; align-items:center; }
+.split-amt { font-family:'Nunito',sans-serif; font-size:18px; font-weight:900; color:var(--ink); }
+.split-card-tag { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink3); }
+.paid-btn {
+  background:var(--green); color:white;
+  border:none; border-radius:var(--r-pill);
+  font-family:'Nunito',sans-serif; font-size:12px; font-weight:700;
+  padding:7px 16px; cursor:pointer;
+}
+.paid-btn.done { background:var(--green-bg); color:var(--green); }
+
+/* ══════════════════════════════
+   LOANS SCREEN
+══════════════════════════════ */
+.loan-header { padding:16px 0 4px; }
+.loan-tabs { display:flex; gap:8px; margin:12px 0 16px; }
+.loan-tab {
+  padding:8px 18px; border-radius:var(--r-pill);
+  font-family:'Nunito',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; border:1px solid var(--border); color:var(--ink3);
+  background:white; transition:all 0.15s;
+}
+.loan-tab.on { background:var(--ink); color:white; border-color:var(--ink); }
+.loan-item {
+  background:white; border:1px solid var(--border); border-radius:18px; padding:18px;
+  margin-bottom:10px;
+}
+.loan-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.loan-person { display:flex; align-items:center; gap:10px; }
+.loan-name { font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:var(--ink); }
+.loan-principal { font-size:12px; color:var(--ink3); margin-top:1px; }
+.loan-monthly { text-align:right; }
+.loan-mo-amt { font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; color:var(--ink); }
+.loan-mo-lbl { font-size:11px; color:var(--ink3); }
+.loan-progress { margin-bottom:10px; }
+.loan-bar-bg { height:6px; border-radius:100px; background:var(--bg); overflow:hidden; margin:8px 0; }
+.loan-bar-fill { height:6px; border-radius:100px; }
+.loan-bar-row { display:flex; justify-content:space-between; }
+.loan-bar-lbl { font-size:11px; color:var(--ink3); font-weight:500; }
+.loan-pay-btn {
+  width:100%; padding:10px; border-radius:var(--r-pill);
+  border:1px solid var(--border); background:white;
+  font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:var(--ink);
+  cursor:pointer; transition:all 0.15s;
+}
+.loan-pay-btn:hover { background:var(--ink); color:white; border-color:var(--ink); }
+.loan-pay-btn.done { background:var(--green-bg); color:var(--green); border-color:var(--green-bg); }
+
+/* ══════════════════════════════
+   ADD TRANSACTION SHEET
+══════════════════════════════ */
+.sheet-phone .scroll { padding-bottom:20px; }
+.sheet-handle { width:36px; height:4px; border-radius:2px; background:var(--border2); margin:12px auto 20px; }
+.sheet-title { font-family:'Nunito',sans-serif; font-size:20px; font-weight:900; color:var(--ink); margin-bottom:20px; }
+.type-toggle {
+  display:flex; background:var(--bg); border-radius:var(--r-pill); padding:4px; gap:2px; margin-bottom:24px;
+}
+.type-btn {
+  flex:1; text-align:center; padding:10px;
+  border-radius:var(--r-pill); font-family:'Nunito',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all 0.15s; color:var(--ink3);
+}
+.type-btn.on-expense { background:var(--red); color:white; }
+.type-btn.on-income  { background:var(--green); color:white; }
+
+.amount-input-wrap { text-align:center; margin-bottom:28px; }
+.amount-prefix { font-family:'Nunito',sans-serif; font-size:28px; font-weight:900; color:var(--ink3); vertical-align:top; margin-top:8px; display:inline-block; }
+.amount-display {
+  font-family:'Nunito',sans-serif; font-size:52px; font-weight:900;
+  color:var(--ink); letter-spacing:-2px; display:inline-block;
+}
+.amount-cursor { display:inline-block; width:3px; height:48px; background:var(--blue); border-radius:2px; vertical-align:middle; margin-left:2px; animation:blink 1s infinite; }
+@keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+.input-row { margin-bottom:14px; }
+.input-lbl { font-family:'Nunito',sans-serif; font-size:12px; font-weight:700; color:var(--ink2); margin-bottom:6px; }
+.input-field {
+  width:100%; padding:14px 16px; border-radius:var(--r-sm);
+  border:1px solid var(--border2); background:var(--bg);
+  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink);
+  outline:none;
+}
+.input-field:focus { border-color:var(--blue); background:white; }
+
+.cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:20px; }
+.cat-item {
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  padding:10px 6px; border-radius:14px; border:1px solid var(--border);
+  cursor:pointer; background:white; transition:all 0.12s;
+}
+.cat-item:hover, .cat-item.sel { border-color:currentColor; }
+.cat-item.sel { background:var(--bg); }
+.cat-ico { font-size:22px; }
+.cat-name { font-family:'Nunito',sans-serif; font-size:9px; font-weight:700; color:var(--ink2); text-align:center; line-height:1.2; }
+
+.submit-btn {
+  width:100%; padding:16px; border-radius:var(--r-pill);
+  background:var(--ink); border:none;
+  font-family:'Nunito',sans-serif; font-size:16px; font-weight:800; color:white;
+  cursor:pointer; transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow:0 4px 16px rgba(15,15,20,0.2);
+}
+.submit-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(15,15,20,0.28); }
+
+/* Responsive layout */
+.wrapper { display:flex; flex-wrap:wrap; justify-content:center; gap:24px; }
+
+@media(max-width:600px) {
+  body { padding:16px 8px 32px; }
+  .phone { width:100%; max-width:375px; height:auto; min-height:700px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+<!-- ══ SCREEN 1: HOME ══ -->
+<div class="scene">
+  <div class="screen-label">🏠 Home</div>
+  <div class="phone">
+    <div class="status">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="scroll">
+
+      <!-- Header -->
+      <div class="home-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="avatar">J</div>
+          <div>
+            <div class="greet-sub">Buenos días,</div>
+            <div class="greet-name">Jesús 👋</div>
+          </div>
+        </div>
+        <div class="notif-btn">🔔<div class="notif-badge"></div></div>
+      </div>
+
+      <!-- Hero balance -->
+      <div class="hero">
+        <div class="hero-lbl">Balance este mes</div>
+        <div class="hero-amount">$18,430</div>
+        <div class="hero-period">Marzo 2025 · Quincenal</div>
+        <div class="hero-divider"></div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-lbl">Ingresos</div>
+            <div class="hero-stat-row">
+              <div class="hero-dot hd-green"></div>
+              <span class="hero-stat-val hv-green">$32,000</span>
+            </div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-lbl">Gastos</div>
+            <div class="hero-stat-row">
+              <div class="hero-dot hd-red"></div>
+              <span class="hero-stat-val hv-red">$13,570</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick access -->
+      <div class="quick-grid">
+        <div class="quick-card">
+          <div class="quick-icon" style="background:#EEF4FF;">💳</div>
+          <div class="quick-name">Tarjetas</div>
+          <div class="quick-sub">2 activas · $4,200</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-icon" style="background:#F3EEFF;">📦</div>
+          <div class="quick-name">Cajitas</div>
+          <div class="quick-sub">5 fondos activos</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-icon" style="background:#ECFEFF;">🤝</div>
+          <div class="quick-name">Te deben</div>
+          <div class="quick-sub">3 personas · $1,800</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-icon" style="background:#FFF3EE;">📊</div>
+          <div class="quick-name">MSI activos</div>
+          <div class="quick-sub">4 planes · $680/mes</div>
+        </div>
+      </div>
+
+      <!-- Transactions -->
+      <div class="sec-row">
+        <span class="sec-title">Últimos movimientos</span>
+        <span class="sec-link">Ver todos</span>
+      </div>
+      <div class="tx-card">
+        <div class="tx-item">
+          <div class="tx-ico" style="background:#FFF0F3;">🛒</div>
+          <div class="tx-body">
+            <div class="tx-name">Super Walmart</div>
+            <div class="tx-meta">Despensa · BBVA Azul</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amt amt-red">−$1,240</div>
+            <div class="tx-date">Hoy</div>
+          </div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-ico" style="background:#E8F8EE;">💼</div>
+          <div class="tx-body">
+            <div class="tx-name">Nómina Proeza</div>
+            <div class="tx-meta">Salario quincenal</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amt amt-green">+$16,000</div>
+            <div class="tx-date">1 mar</div>
+          </div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-ico" style="background:#ECFEFF;">⛽</div>
+          <div class="tx-body">
+            <div class="tx-name">Gasolinera</div>
+            <div class="tx-meta">Transporte · Efectivo</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amt amt-red">−$650</div>
+            <div class="tx-date">28 feb</div>
+          </div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-ico" style="background:#FFF3EE;">🍕</div>
+          <div class="tx-body">
+            <div class="tx-name">Domino's Pizza</div>
+            <div class="tx-meta">Comida · con Rodrigo, Ana</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amt amt-red">−$480</div>
+            <div class="tx-date">27 feb</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- Nav -->
+    <div class="nav">
+      <div class="nav-tab on"><div class="nav-icon">🏠</div><div class="nav-lbl">Home</div><div class="nav-dot"></div></div>
+      <div class="nav-tab"><div class="nav-icon">📦</div><div class="nav-lbl">Cajitas</div></div>
+      <div class="fab-wrap">
+        <div class="fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="fab-lbl">Agregar</div>
+      </div>
+      <div class="nav-tab"><div class="nav-icon">💳</div><div class="nav-lbl">Tarjetas</div></div>
+      <div class="nav-tab"><div class="nav-icon">📊</div><div class="nav-lbl">Analytics</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: CAJITAS ══ -->
+<div class="scene">
+  <div class="screen-label">📦 Cajitas</div>
+  <div class="phone">
+    <div class="status">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="scroll">
+      <div class="cajitas-header">
+        <div class="cajitas-total-lbl">Total ahorrado</div>
+        <div class="cajitas-total-val">$9,150</div>
+        <div style="margin-top:6px;" class="label">Quincenal · próxima recarga en 6 días</div>
+      </div>
+
+      <div class="sec-row" style="margin-top:20px;">
+        <span class="sec-title">Mis cajitas</span>
+        <span class="sec-link">+ Nueva</span>
+      </div>
+
+      <!-- Cajita 1 - normal -->
+      <div class="cajita-card" style="background:linear-gradient(135deg,#3B82F6,#2563EB);">
+        <div class="cajita-bg-circle"></div>
+        <div class="cajita-top">
+          <div class="cajita-icon-wrap">✈️</div>
+          <div class="cajita-badge">68%</div>
+        </div>
+        <div class="cajita-name">Viaje / Vacaciones</div>
+        <div class="cajita-acc">$3,400</div>
+        <div class="cajita-bar-bg"><div class="cajita-bar-fill" style="width:68%"></div></div>
+        <div class="cajita-footer">
+          <span class="cajita-foot-txt">Meta: $5,000</span>
+          <span class="cajita-foot-val">$2,500 / quincena</span>
+        </div>
+      </div>
+
+      <!-- Cajita 2 - normal -->
+      <div class="cajita-card" style="background:linear-gradient(135deg,#00C07F,#059669);">
+        <div class="cajita-bg-circle"></div>
+        <div class="cajita-top">
+          <div class="cajita-icon-wrap">🏠</div>
+          <div class="cajita-badge">45%</div>
+        </div>
+        <div class="cajita-name">Gastos del hogar</div>
+        <div class="cajita-acc">$2,250</div>
+        <div class="cajita-bar-bg"><div class="cajita-bar-fill" style="width:45%"></div></div>
+        <div class="cajita-footer">
+          <span class="cajita-foot-txt">Presupuesto: $5,000</span>
+          <span class="cajita-foot-val">$2,500 / quincena</span>
+        </div>
+      </div>
+
+      <!-- Cajita 3 - ALERTA: excedida -->
+      <div class="cajita-alert">
+        <div class="cajita-alert-top">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="cajita-alert-ico">🍔</div>
+            <div>
+              <div class="cajita-alert-name">Comida / Restaurantes</div>
+              <div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px;">⚠️ Presupuesto excedido</div>
+            </div>
+          </div>
+          <div class="cajita-alert-badge">118%</div>
+        </div>
+        <div class="cajita-alert-acc">−$590</div>
+        <div class="cajita-alert-bar-bg"><div class="cajita-alert-bar-fill" style="width:100%"></div></div>
+        <div class="cajita-alert-footer">
+          <span class="cajita-alert-ft">Límite: $2,000</span>
+          <span class="cajita-alert-fv">−$360 sobre límite</span>
+        </div>
+      </div>
+
+      <!-- Cajita 4 -->
+      <div class="cajita-card" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);">
+        <div class="cajita-bg-circle"></div>
+        <div class="cajita-top">
+          <div class="cajita-icon-wrap">💊</div>
+          <div class="cajita-badge">30%</div>
+        </div>
+        <div class="cajita-name">Salud / Medicamentos</div>
+        <div class="cajita-acc">$1,500</div>
+        <div class="cajita-bar-bg"><div class="cajita-bar-fill" style="width:30%"></div></div>
+        <div class="cajita-footer">
+          <span class="cajita-foot-txt">Presupuesto: $5,000</span>
+          <span class="cajita-foot-val">$2,500 / quincena</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav">
+      <div class="nav-tab"><div class="nav-icon">🏠</div><div class="nav-lbl">Home</div></div>
+      <div class="nav-tab on"><div class="nav-icon">📦</div><div class="nav-lbl">Cajitas</div><div class="nav-dot"></div></div>
+      <div class="fab-wrap">
+        <div class="fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="fab-lbl">Agregar</div>
+      </div>
+      <div class="nav-tab"><div class="nav-icon">💳</div><div class="nav-lbl">Tarjetas</div></div>
+      <div class="nav-tab"><div class="nav-icon">📊</div><div class="nav-lbl">Analytics</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: ANALYTICS ══ -->
+<div class="scene">
+  <div class="screen-label">📊 Analytics</div>
+  <div class="phone">
+    <div class="status">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="scroll">
+      <div class="analytics-header">
+        <div class="h2">Resumen</div>
+      </div>
+
+      <div class="period-tabs">
+        <div class="ptab on">Mes</div>
+        <div class="ptab">3 meses</div>
+        <div class="ptab">Año</div>
+      </div>
+
+      <!-- Donut -->
+      <div class="card" style="margin-bottom:12px;">
+        <div class="h3" style="margin-bottom:4px;">En qué gasté</div>
+        <div class="label" style="margin-bottom:16px;">Marzo 2025 · $13,570</div>
+        <div class="donut-wrap">
+          <div class="donut-container">
+            <svg class="donut-svg" viewBox="0 0 192 192">
+              <!-- cx=96 cy=96 r=72 circumference=452.4 -->
+              <!-- Comida 28% = 126.7 -->
+              <circle cx="96" cy="96" r="72" fill="none" stroke="#FF4060" stroke-width="28"
+                stroke-dasharray="126.7 325.7" stroke-dashoffset="0" stroke-linecap="round"/>
+              <!-- Casa 22% = 99.5 -->
+              <circle cx="96" cy="96" r="72" fill="none" stroke="#3B82F6" stroke-width="28"
+                stroke-dasharray="99.5 352.9" stroke-dashoffset="-130.7" stroke-linecap="round"/>
+              <!-- Transporte 18% = 81.4 -->
+              <circle cx="96" cy="96" r="72" fill="none" stroke="#F59E0B" stroke-width="28"
+                stroke-dasharray="81.4 370.9" stroke-dashoffset="-234.2" stroke-linecap="round"/>
+              <!-- Salud 14% = 63.3 -->
+              <circle cx="96" cy="96" r="72" fill="none" stroke="#8B5CF6" stroke-width="28"
+                stroke-dasharray="63.3 389" stroke-dashoffset="-319.6" stroke-linecap="round"/>
+              <!-- Entretenimiento 11% = 49.8 -->
+              <circle cx="96" cy="96" r="72" fill="none" stroke="#06B6D4" stroke-width="28"
+                stroke-dasharray="49.8 402.6" stroke-dashoffset="-386.9" stroke-linecap="round"/>
+              <!-- Otros 7% = 31.7 -->
+              <circle cx="96" cy="96" r="72" fill="none" stroke="#E5E5EA" stroke-width="28"
+                stroke-dasharray="31.7 420.7" stroke-dashoffset="-440.7" stroke-linecap="round"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-c-amt">$13,570</div>
+              <div class="donut-c-lbl">Total gastos</div>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="leg-item">
+              <div class="leg-dot" style="background:#FF4060"></div>
+              <div class="leg-name">Comida</div>
+              <div class="leg-right">
+                <div class="leg-amt">$3,800</div>
+                <div class="leg-pct">28%</div>
+              </div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-dot" style="background:#3B82F6"></div>
+              <div class="leg-name">Hogar</div>
+              <div class="leg-right">
+                <div class="leg-amt">$2,985</div>
+                <div class="leg-pct">22%</div>
+              </div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-dot" style="background:#F59E0B"></div>
+              <div class="leg-name">Transporte</div>
+              <div class="leg-right">
+                <div class="leg-amt">$2,443</div>
+                <div class="leg-pct">18%</div>
+              </div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-dot" style="background:#8B5CF6"></div>
+              <div class="leg-name">Salud</div>
+              <div class="leg-right">
+                <div class="leg-amt">$1,900</div>
+                <div class="leg-pct">14%</div>
+              </div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-dot" style="background:#06B6D4"></div>
+              <div class="leg-name">Entretenimiento</div>
+              <div class="leg-right">
+                <div class="leg-amt">$1,493</div>
+                <div class="leg-pct">11%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="card">
+        <div class="h3" style="margin-bottom:4px;">Mes a mes</div>
+        <div class="label" style="margin-bottom:16px;">Ingresos vs Gastos · 2025</div>
+        <div class="bars-area">
+          <!-- Ene -->
+          <div class="bar-col">
+            <div class="bar-pair">
+              <div class="bar" style="height:62px;background:#E8F8EE;border-radius:6px 6px 0 0;"></div>
+              <div class="bar" style="height:48px;background:#FFE8EC;border-radius:6px 6px 0 0;"></div>
+            </div>
+            <div class="bar-lbl">Ene</div>
+          </div>
+          <!-- Feb -->
+          <div class="bar-col">
+            <div class="bar-pair">
+              <div class="bar" style="height:72px;background:#00C07F;border-radius:6px 6px 0 0;"></div>
+              <div class="bar" style="height:52px;background:#FF4060;border-radius:6px 6px 0 0;"></div>
+            </div>
+            <div class="bar-lbl">Feb</div>
+          </div>
+          <!-- Mar actual -->
+          <div class="bar-col">
+            <div class="bar-pair">
+              <div class="bar" style="height:80px;background:#00C07F;border-radius:6px 6px 0 0;"></div>
+              <div class="bar" style="height:55px;background:#FF4060;border-radius:6px 6px 0 0;"></div>
+            </div>
+            <div class="bar-lbl" style="color:var(--ink);font-weight:800;">Mar</div>
+          </div>
+          <!-- Abr-Dic fantasmas -->
+          <div class="bar-col"><div class="bar-pair"><div class="bar" style="height:0;background:var(--border);"></div></div><div class="bar-lbl">Abr</div></div>
+          <div class="bar-col"><div class="bar-pair"><div class="bar" style="height:0;background:var(--border);"></div></div><div class="bar-lbl">May</div></div>
+          <div class="bar-col"><div class="bar-pair"><div class="bar" style="height:0;background:var(--border);"></div></div><div class="bar-lbl">Jun</div></div>
+        </div>
+        <div class="bar-legend">
+          <div class="bar-leg-item"><div class="bar-leg-dot" style="background:#00C07F;"></div>Ingresos</div>
+          <div class="bar-leg-item"><div class="bar-leg-dot" style="background:#FF4060;"></div>Gastos</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav">
+      <div class="nav-tab"><div class="nav-icon">🏠</div><div class="nav-lbl">Home</div></div>
+      <div class="nav-tab"><div class="nav-icon">📦</div><div class="nav-lbl">Cajitas</div></div>
+      <div class="fab-wrap">
+        <div class="fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="fab-lbl">Agregar</div>
+      </div>
+      <div class="nav-tab"><div class="nav-icon">💳</div><div class="nav-lbl">Tarjetas</div></div>
+      <div class="nav-tab on"><div class="nav-icon">📊</div><div class="nav-lbl">Analytics</div><div class="nav-dot"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 4: TARJETAS ══ -->
+<div class="scene">
+  <div class="screen-label">💳 Tarjetas</div>
+  <div class="phone">
+    <div class="status">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="scroll">
+      <div class="cards-header">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0 4px;">
+          <div class="h2">Mis Tarjetas</div>
+          <span class="sec-link">+ Agregar</span>
+        </div>
+      </div>
+
+      <!-- Card 1 -->
+      <div class="credit-card" style="background:linear-gradient(135deg,#1A1A2E 0%,#16213E 50%,#0F3460 100%);">
+        <div class="cc-noise"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="cc-chip">💳</div>
+            <div class="cc-bank" style="color:rgba(255,255,255,0.5);">BBVA</div>
+            <div class="cc-name">Azul</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 10px;">
+            <span style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);">Visa</span>
+          </div>
+        </div>
+        <div class="cc-row">
+          <div class="cc-num">•••• 4821</div>
+          <div class="cc-balance">
+            <div class="cc-bal-lbl">Saldo actual</div>
+            <div class="cc-bal-amt">$4,200</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cc-info-row">
+        <div class="cc-info-card">
+          <div class="cc-info-lbl">Corte</div>
+          <div class="cc-info-val" style="color:var(--amber);">15 mar</div>
+          <div class="cc-info-sub">En 9 días</div>
+        </div>
+        <div class="cc-info-card">
+          <div class="cc-info-lbl">Límite pago</div>
+          <div class="cc-info-val" style="color:var(--red);">28 mar</div>
+          <div class="cc-info-sub">Sin intereses</div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="credit-card" style="background:linear-gradient(135deg,#F43F5E 0%, #E11D48 50%, #BE123C 100%);">
+        <div class="cc-noise"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="cc-chip">💳</div>
+            <div class="cc-bank" style="color:rgba(255,255,255,0.5);">Banorte</div>
+            <div class="cc-name">Ordinaria</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 10px;">
+            <span style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);">MC</span>
+          </div>
+        </div>
+        <div class="cc-row">
+          <div class="cc-num">•••• 7293</div>
+          <div class="cc-balance">
+            <div class="cc-bal-lbl">Saldo actual</div>
+            <div class="cc-bal-amt">$1,880</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MSI preview -->
+      <div class="sec-row">
+        <span class="sec-title">MSI activos</span>
+        <span class="sec-link">Ver todos</span>
+      </div>
+
+      <div class="msi-item">
+        <div class="msi-icon">📱</div>
+        <div class="msi-body">
+          <div class="msi-name">iPhone 15 Pro</div>
+          <div class="msi-meta">BBVA Azul · 2 de 12 meses</div>
+        </div>
+        <div class="msi-right">
+          <div class="msi-amt">$1,250/mes</div>
+          <div class="msi-left">10 pagos restantes</div>
+        </div>
+      </div>
+
+      <div class="msi-item">
+        <div class="msi-icon">💻</div>
+        <div class="msi-body">
+          <div class="msi-name">MacBook Air M2</div>
+          <div class="msi-meta">Banorte · 5 de 18 meses</div>
+        </div>
+        <div class="msi-right">
+          <div class="msi-amt">$883/mes</div>
+          <div class="msi-left">13 pagos restantes</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav">
+      <div class="nav-tab"><div class="nav-icon">🏠</div><div class="nav-lbl">Home</div></div>
+      <div class="nav-tab"><div class="nav-icon">📦</div><div class="nav-lbl">Cajitas</div></div>
+      <div class="fab-wrap">
+        <div class="fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="fab-lbl">Agregar</div>
+      </div>
+      <div class="nav-tab on"><div class="nav-icon">💳</div><div class="nav-lbl">Tarjetas</div><div class="nav-dot"></div></div>
+      <div class="nav-tab"><div class="nav-icon">📊</div><div class="nav-lbl">Analytics</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 5: ADD TRANSACTION ══ -->
+<div class="scene">
+  <div class="screen-label">➕ Agregar gasto</div>
+  <div class="phone sheet-phone" style="background:#F4F4F6;">
+    <div class="status" style="background:#F4F4F6;">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <!-- Bottom sheet -->
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;">
+      <div style="background:white;border-radius:32px 32px 0 0;box-shadow:0 -4px 32px rgba(0,0,0,0.10);padding:0 20px 32px;overflow-y:auto;max-height:680px;">
+        <div class="sheet-handle"></div>
+        <div class="type-toggle">
+          <div class="type-btn on-expense">💸 Gasto</div>
+          <div class="type-btn">💰 Ingreso</div>
+        </div>
+
+        <div class="amount-input-wrap">
+          <span class="amount-prefix">$</span>
+          <span class="amount-display">1,240</span>
+          <span class="amount-cursor"></span>
+        </div>
+
+        <div class="input-row">
+          <div class="input-lbl">Descripción</div>
+          <input class="input-field" type="text" placeholder="¿En qué gastaste?" value="Super Walmart">
+        </div>
+
+        <div class="input-row">
+          <div class="input-lbl">Categoría</div>
+          <div class="cat-grid">
+            <div class="cat-item sel" style="color:var(--amber);">
+              <div class="cat-ico">🛒</div>
+              <div class="cat-name">Despensa</div>
+            </div>
+            <div class="cat-item" style="color:var(--red);">
+              <div class="cat-ico">🍕</div>
+              <div class="cat-name">Comida</div>
+            </div>
+            <div class="cat-item" style="color:var(--blue);">
+              <div class="cat-ico">⛽</div>
+              <div class="cat-name">Transporte</div>
+            </div>
+            <div class="cat-item" style="color:var(--purple);">
+              <div class="cat-ico">💊</div>
+              <div class="cat-name">Salud</div>
+            </div>
+            <div class="cat-item" style="color:var(--teal);">
+              <div class="cat-ico">🎮</div>
+              <div class="cat-name">Ocio</div>
+            </div>
+            <div class="cat-item" style="color:var(--green);">
+              <div class="cat-ico">🏠</div>
+              <div class="cat-name">Hogar</div>
+            </div>
+            <div class="cat-item" style="color:var(--rose);">
+              <div class="cat-ico">👗</div>
+              <div class="cat-name">Ropa</div>
+            </div>
+            <div class="cat-item">
+              <div class="cat-ico">⋯</div>
+              <div class="cat-name">Más</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="input-row" style="margin-bottom:0;">
+            <div class="input-lbl">Tarjeta / Método</div>
+            <div class="input-field" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span>BBVA Azul</span><span>›</span>
+            </div>
+          </div>
+          <div class="input-row" style="margin-bottom:0;">
+            <div class="input-lbl">Cajita</div>
+            <div class="input-field" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span>Despensa</span><span>›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row" style="display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:14px;padding:14px 16px;">
+          <div>
+            <div class="input-lbl" style="margin-bottom:2px;">¿Gasto compartido?</div>
+            <div style="font-size:12px;color:var(--ink3);">Dividir con otras personas</div>
+          </div>
+          <div style="width:44px;height:26px;background:var(--ink);border-radius:13px;position:relative;cursor:pointer;">
+            <div style="width:20px;height:20px;background:white;border-radius:50%;position:absolute;right:3px;top:3px;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <button class="submit-btn">Guardar gasto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 6: SPLITS ══ -->
+<div class="scene">
+  <div class="screen-label">🤝 Me deben</div>
+  <div class="phone">
+    <div class="status">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="scroll">
+      <div class="split-header">
+        <div style="padding:16px 0 4px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div class="h2">Me deben</div>
+            <div class="label" style="margin-top:3px;">Corte actual · 3 personas</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:var(--ink3);margin-bottom:2px;">Total pendiente</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--ink);">$1,850</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-row"><span class="sec-title">Corte actual · BBVA</span></div>
+
+      <div class="split-item">
+        <div class="split-top">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);">R</div>
+          <div>
+            <div class="split-name">Rodrigo</div>
+            <div class="split-tx-name">Domino's Pizza · BBVA Azul</div>
+          </div>
+        </div>
+        <div class="split-bottom">
+          <div>
+            <div class="split-amt">$160</div>
+            <div class="split-card-tag">📅 Corte 15 mar</div>
+          </div>
+          <button class="paid-btn">Marcar pagado</button>
+        </div>
+      </div>
+
+      <div class="split-item">
+        <div class="split-top">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#F43F5E,#BE123C);">A</div>
+          <div>
+            <div class="split-name">Ana García</div>
+            <div class="split-tx-name">Uber Eats · BBVA Azul</div>
+          </div>
+        </div>
+        <div class="split-bottom">
+          <div>
+            <div class="split-amt">$240</div>
+            <div class="split-card-tag">📅 Corte 15 mar</div>
+          </div>
+          <button class="paid-btn done">✓ Pagado</button>
+        </div>
+      </div>
+
+      <div class="split-item">
+        <div class="split-top">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);">M</div>
+          <div>
+            <div class="split-name">Miguel Torres</div>
+            <div class="split-tx-name">Restaurante Valentina · Banorte</div>
+          </div>
+        </div>
+        <div class="split-bottom">
+          <div>
+            <div class="split-amt">$450</div>
+            <div class="split-card-tag">📅 Corte 20 mar</div>
+          </div>
+          <button class="paid-btn">Marcar pagado</button>
+        </div>
+      </div>
+
+      <div class="sec-row" style="margin-top:8px;"><span class="sec-title">Siguiente corte · preview</span></div>
+      <div class="card" style="border:1px dashed var(--border2);background:var(--bg);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#06B6D4,#0E7490);width:36px;height:36px;font-size:13px;">L</div>
+          <div style="flex:1;">
+            <div style="font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--ink);">Luis Hernández</div>
+            <div style="font-size:11px;color:var(--ink3);">Cinépolis · BBVA Azul</div>
+          </div>
+          <div style="font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--ink2);">$300</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav">
+      <div class="nav-tab"><div class="nav-icon">🏠</div><div class="nav-lbl">Home</div></div>
+      <div class="nav-tab"><div class="nav-icon">📦</div><div class="nav-lbl">Cajitas</div></div>
+      <div class="fab-wrap">
+        <div class="fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="fab-lbl">Agregar</div>
+      </div>
+      <div class="nav-tab"><div class="nav-icon">💳</div><div class="nav-lbl">Tarjetas</div></div>
+      <div class="nav-tab"><div class="nav-icon">📊</div><div class="nav-lbl">Analytics</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 7: LOANS ══ -->
+<div class="scene">
+  <div class="screen-label">🤲 Préstamos</div>
+  <div class="phone">
+    <div class="status">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="scroll">
+      <div class="loan-header">
+        <div style="padding:16px 0 4px;">
+          <div class="h2">Préstamos</div>
+        </div>
+      </div>
+
+      <div class="loan-tabs">
+        <div class="loan-tab on">💸 Presté</div>
+        <div class="loan-tab">🤝 Me prestaron</div>
+      </div>
+
+      <div class="loan-item">
+        <div class="loan-top">
+          <div class="loan-person">
+            <div class="contact-avatar" style="background:linear-gradient(135deg,#00C07F,#059669);width:40px;height:40px;">C</div>
+            <div>
+              <div class="loan-name">Carlos Méndez</div>
+              <div class="loan-principal">Principal: $5,000</div>
+            </div>
+          </div>
+          <div class="loan-monthly">
+            <div class="loan-mo-amt">$1,000</div>
+            <div class="loan-mo-lbl">por mes</div>
+          </div>
+        </div>
+        <div class="loan-progress">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span class="label-bold">Progreso de pago</span>
+            <span class="label">2 de 5 meses</span>
+          </div>
+          <div class="loan-bar-bg"><div class="loan-bar-fill" style="width:40%;background:var(--green);height:6px;border-radius:100px;"></div></div>
+          <div class="loan-bar-row" style="margin-top:6px;">
+            <span style="font-size:11px;color:var(--green);font-weight:700;">$2,000 pagado</span>
+            <span style="font-size:11px;color:var(--ink3);">$3,000 restante</span>
+          </div>
+        </div>
+        <button class="loan-pay-btn">Registrar pago de marzo</button>
+      </div>
+
+      <div class="loan-item">
+        <div class="loan-top">
+          <div class="loan-person">
+            <div class="contact-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706);width:40px;height:40px;">P</div>
+            <div>
+              <div class="loan-name">Papá</div>
+              <div class="loan-principal">Principal: $10,000</div>
+            </div>
+          </div>
+          <div class="loan-monthly">
+            <div class="loan-mo-amt">$2,000</div>
+            <div class="loan-mo-lbl">por mes</div>
+          </div>
+        </div>
+        <div class="loan-progress">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span class="label-bold">Progreso de pago</span>
+            <span class="label">4 de 5 meses</span>
+          </div>
+          <div class="loan-bar-bg"><div class="loan-bar-fill" style="width:80%;background:var(--amber);height:6px;border-radius:100px;"></div></div>
+          <div class="loan-bar-row" style="margin-top:6px;">
+            <span style="font-size:11px;color:var(--amber);font-weight:700;">$8,000 pagado</span>
+            <span style="font-size:11px;color:var(--ink3);">$2,000 restante</span>
+          </div>
+        </div>
+        <button class="loan-pay-btn done">✓ Pago de marzo registrado</button>
+      </div>
+
+    </div>
+    <div class="nav">
+      <div class="nav-tab"><div class="nav-icon">🏠</div><div class="nav-lbl">Home</div></div>
+      <div class="nav-tab"><div class="nav-icon">📦</div><div class="nav-lbl">Cajitas</div></div>
+      <div class="fab-wrap">
+        <div class="fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="fab-lbl">Agregar</div>
+      </div>
+      <div class="nav-tab"><div class="nav-icon">💳</div><div class="nav-lbl">Tarjetas</div></div>
+      <div class="nav-tab"><div class="nav-icon">📊</div><div class="nav-lbl">Analytics</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+</body>
+</html>
