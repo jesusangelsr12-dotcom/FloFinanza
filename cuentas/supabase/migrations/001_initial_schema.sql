@@ -154,6 +154,7 @@ CREATE TABLE installment_plans (
 CREATE TABLE installment_payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   plan_id UUID REFERENCES installment_plans(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   month_number INT NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
   due_date DATE NOT NULL,
@@ -188,6 +189,7 @@ CREATE TABLE loans (
 CREATE TABLE loan_payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   loan_id UUID REFERENCES loans(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   month_number INT NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
   due_date DATE NOT NULL,
