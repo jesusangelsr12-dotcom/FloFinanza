@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-nunito: 'Nunito', system-ui, sans-serif;
+  --font-dm-sans: 'DM Sans', system-ui, sans-serif;
+  --white: #FFFFFF;
+  --bg: #F4F4F6;
+  --card: #FFFFFF;
+  --border: #EFEFEF;
+  --border2: #E8E8E8;
+  --ink: #0F0F14;
+  --ink2: #5A5A6E;
+  --ink3: #A0A0B0;
+  --green: #00C07F;
+  --green-bg: #E6FAF3;
+  --red: #FF4060;
+  --red-bg: #FFF0F3;
+  --blue: #3B82F6;
+  --blue-bg: #EEF4FF;
+  --amber: #F59E0B;
+  --amber-bg: #FFFBEB;
+  --purple: #8B5CF6;
+  --purple-bg: #F3EEFF;
+  --teal: #06B6D4;
+  --teal-bg: #ECFEFF;
+  --rose: #F43F5E;
+  --rose-bg: #FFF1F2;
+  --r: 22px;
+  --r-sm: 14px;
+  --r-xs: 10px;
+  --r-pill: 100px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--bg);
+  font-family: var(--font-dm-sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar globally for app-like feel */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* Amount cursor blink animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
+/* Safe area insets for PWA */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  }
+}
