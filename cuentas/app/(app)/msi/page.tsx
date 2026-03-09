@@ -31,6 +31,8 @@ export default function MSIPage() {
   const [description, setDescription] = useState('')
   const [totalAmount, setTotalAmount] = useState('')
   const [totalMonths, setTotalMonths] = useState('')
+  const [showCustomMonths, setShowCustomMonths] = useState(false)
+  const [customMonths, setCustomMonths] = useState('')
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
 
   const displayPlans = activeTab === 'active' ? activePlans : completedPlans
@@ -268,13 +270,17 @@ export default function MSIPage() {
 
           <div className="flex flex-col gap-1.5">
             <label className="font-display text-xs font-bold text-ink-2">Numero de meses</label>
-            <div className="flex gap-2">
-              {[3, 6, 9, 12, 18, 24].map((m) => (
+            <div className="grid grid-cols-4 gap-2">
+              {[3, 6, 9, 12, 18, 24, 36, 48].map((m) => (
                 <button
                   key={m}
-                  onClick={() => setTotalMonths(String(m))}
-                  className={`flex-1 py-2 rounded-sm font-display text-xs font-bold transition-colors ${
-                    totalMonths === String(m)
+                  onClick={() => {
+                    setTotalMonths(String(m))
+                    setShowCustomMonths(false)
+                    setCustomMonths('')
+                  }}
+                  className={`py-2 rounded-sm font-display text-xs font-bold transition-colors ${
+                    totalMonths === String(m) && !showCustomMonths
                       ? 'bg-accent-purple text-white'
                       : 'bg-bg border border-border text-ink-2'
                   }`}
@@ -282,7 +288,36 @@ export default function MSIPage() {
                   {m}
                 </button>
               ))}
+              <button
+                onClick={() => {
+                  setShowCustomMonths(true)
+                  setTotalMonths('')
+                  setCustomMonths('')
+                }}
+                className={`col-span-4 py-2 rounded-sm font-display text-xs font-bold transition-colors ${
+                  showCustomMonths
+                    ? 'bg-accent-purple text-white'
+                    : 'bg-bg border border-border text-ink-2'
+                }`}
+              >
+                Otro (personalizado)
+              </button>
             </div>
+            {showCustomMonths && (
+              <Input
+                label=""
+                type="number"
+                placeholder="Escribe el numero de meses (1-120)"
+                value={customMonths}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '')
+                  const num = Math.min(Number(val), 120)
+                  const clean = val ? String(num) : ''
+                  setCustomMonths(clean)
+                  setTotalMonths(clean)
+                }}
+              />
+            )}
           </div>
 
           {monthlyAmount > 0 && (
