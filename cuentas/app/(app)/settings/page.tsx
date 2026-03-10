@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, DollarSign, Tag, Package, CreditCard, Plus, Trash2, X, Calendar } from 'lucide-react'
+import { ArrowLeft, DollarSign, Tag, Package, CreditCard, Plus, Trash2, X, Calendar, HelpCircle, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useSalary } from '@/lib/hooks/useSalary'
 import { useCategories } from '@/lib/hooks/useCategories'
@@ -45,6 +45,9 @@ export default function SettingsPage() {
 
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string; name: string } | null>(null)
+
+  // Help modal
+  const [showHelp, setShowHelp] = useState(false)
 
   // Load persisted salary settings
   useEffect(() => {
@@ -117,7 +120,13 @@ export default function SettingsPage() {
         <Link href="/" className="w-10 h-10 rounded-full bg-bg border border-border flex items-center justify-center">
           <ArrowLeft size={18} className="text-ink" />
         </Link>
-        <h1 className="font-display text-[22px] font-extrabold text-ink">Configuración</h1>
+        <h1 className="font-display text-[22px] font-extrabold text-ink flex-1">Configuración</h1>
+        <button
+          onClick={() => setShowHelp(true)}
+          className="w-10 h-10 rounded-full bg-accent-blue-bg border border-border flex items-center justify-center"
+        >
+          <HelpCircle size={20} className="text-accent-blue" />
+        </button>
       </div>
 
       {/* ==================== SALARY ==================== */}
@@ -622,6 +631,83 @@ export default function SettingsPage() {
               Eliminar
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* ==================== HELP / ONBOARDING MODAL ==================== */}
+      <Modal isOpen={showHelp} onClose={() => setShowHelp(false)} title="Cómo empezar">
+        <div className="space-y-5">
+          {[
+            {
+              step: 1,
+              title: 'Configura tu salario',
+              desc: 'Pon cuánto ganas por periodo (quincenal, mensual, etc.) y la fecha de tu próximo pago. Así la app calcula cuándo llega tu dinero.',
+              icon: '💰',
+            },
+            {
+              step: 2,
+              title: 'Crea tus categorías',
+              desc: 'Agrega categorías de gasto (Comida, Transporte, Servicios) e ingreso (Nómina, Freelance). Puedes agruparlas en grupos como "Hogar" o "Entretenimiento".',
+              icon: '🏷️',
+            },
+            {
+              step: 3,
+              title: 'Crea tus cajitas',
+              desc: 'Las cajitas son sobres de presupuesto. Asigna un monto a cada una (ej: $3,000 para Comida). Ve a Cajitas desde el menú inferior.',
+              icon: '📦',
+            },
+            {
+              step: 4,
+              title: 'Agrega tus tarjetas',
+              desc: 'Registra tus tarjetas de crédito con banco, últimos 4 dígitos, día de corte y día de pago. Ve a Tarjetas desde el menú inferior.',
+              icon: '💳',
+            },
+            {
+              step: 5,
+              title: 'Registra transacciones',
+              desc: 'Usa el botón + del centro para registrar cada gasto o ingreso. Asígnale categoría, cajita y/o tarjeta.',
+              icon: '✏️',
+            },
+            {
+              step: 6,
+              title: 'Revisa tus analytics',
+              desc: 'En la pestaña de Analytics verás gráficas de tus gastos vs ingresos, distribución por categoría y tendencias.',
+              icon: '📊',
+            },
+            {
+              step: 7,
+              title: 'Extras: MSI, Préstamos y Gastos compartidos',
+              desc: 'Desde el dashboard accede a Meses Sin Intereses, Préstamos (dados y recibidos) y Gastos compartidos con amigos.',
+              icon: '🧩',
+            },
+          ].map((item) => (
+            <div key={item.step} className="flex gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-bg border border-border flex items-center justify-center">
+                <span className="text-lg">{item.icon}</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-ink text-white font-display text-[11px] font-bold">{item.step}</span>
+                  <span className="font-display text-[13px] font-bold text-ink">{item.title}</span>
+                </div>
+                <p className="font-body text-[12px] text-ink-3 leading-relaxed">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+
+          <div className="bg-accent-blue-bg border border-accent-blue/20 rounded-xl p-4 mt-4">
+            <p className="font-display text-[13px] font-bold text-accent-blue mb-1">Tip</p>
+            <p className="font-body text-[12px] text-ink-2 leading-relaxed">
+              Empieza configurando salario y categorías aquí en Configuración. Después ve a Cajitas y Tarjetas para completar tu setup. Una vez listo, solo registra tus gastos día a día.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowHelp(false)}
+            className="w-full py-4 rounded-pill bg-ink text-white font-display text-base font-extrabold shadow-fab hover:-translate-y-0.5 active:translate-y-0 transition-all"
+          >
+            Entendido
+          </button>
         </div>
       </Modal>
     </div>

@@ -41,7 +41,7 @@ export function useBudgets() {
 
     const { data, error } = await supabase
       .from('budgets')
-      .insert({ ...budget, user_id: user.id, accumulated: 0 })
+      .insert({ ...budget, user_id: user.id, accumulated: 0, is_active: true })
       .select()
       .single()
 
