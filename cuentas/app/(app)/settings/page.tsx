@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, DollarSign, Tag, Package, CreditCard, Plus, Trash2, X } from 'lucide-react'
+import { ArrowLeft, DollarSign, Tag, Package, CreditCard, Plus, Trash2, X, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { useSalary } from '@/lib/hooks/useSalary'
 import { useCategories } from '@/lib/hooks/useCategories'
@@ -27,6 +27,7 @@ export default function SettingsPage() {
   const [salary, setSalary] = useState('')
   const [frequency, setFrequency] = useState('biweekly')
   const [customDays, setCustomDays] = useState('14')
+  const [nextDate, setNextDate] = useState('')
   const [salarySaved, setSalarySaved] = useState(false)
 
   // Category modal state
@@ -48,20 +49,22 @@ export default function SettingsPage() {
   // Load persisted salary settings
   useEffect(() => {
     if (settings) {
-      if (settings.salary) setSalary(String(settings.salary))
+      if (settings.salary != null) setSalary(String(settings.salary))
       if (settings.salary_frequency) setFrequency(settings.salary_frequency)
-      if (settings.salary_custom_days) setCustomDays(String(settings.salary_custom_days))
+      if (settings.salary_custom_days != null) setCustomDays(String(settings.salary_custom_days))
+      if (settings.salary_next_date) setNextDate(settings.salary_next_date)
     }
   }, [settings])
 
   const handleSaveSalary = async () => {
-    await updateSalary({
+    const ok = await updateSalary({
       salary: Number(salary) || null,
       salary_frequency: frequency,
       salary_custom_days: frequency === 'custom' ? Number(customDays) || null : null,
+      salary_next_date: nextDate || null,
     })
-    setSalarySaved(true)
-    setTimeout(() => setSalarySaved(false), 2000)
+    setSalarySaved(!!ok)
+    if (ok) setTimeout(() => setSalarySaved(false), 2000)
   }
 
   const handleAddCategory = async () => {
@@ -129,6 +132,11 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {salaryLoading ? (
+          <div className="flex justify-center py-6">
+            <div className="w-5 h-5 border-2 border-ink/20 border-t-ink rounded-full animate-spin" />
+          </div>
+        ) : (
         <div className="space-y-3">
           <div>
             <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Monto por periodo</label>
@@ -178,6 +186,22 @@ export default function SettingsPage() {
             </div>
           )}
 
+          <div>
+            <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">
+              <span className="flex items-center gap-1.5">
+                <Calendar size={13} />
+                Próximo día de pago
+              </span>
+            </label>
+            <input
+              type="date"
+              value={nextDate}
+              onChange={(e) => setNextDate(e.target.value)}
+              className="w-full p-3.5 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink outline-none focus:border-accent-blue focus:bg-white transition"
+            />
+            <p className="text-[11px] text-ink-3 mt-1">A partir de esta fecha se calcula cada cuándo recibes tu salario</p>
+          </div>
+
           <button
             onClick={handleSaveSalary}
             className={`w-full py-3.5 rounded-pill font-display text-sm font-extrabold transition-all ${
@@ -189,6 +213,7 @@ export default function SettingsPage() {
             {salarySaved ? '✓ Guardado' : 'Guardar salario'}
           </button>
         </div>
+        )}
       </div>
 
       {/* ==================== CATEGORIES ==================== */}
