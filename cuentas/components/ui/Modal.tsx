@@ -17,7 +17,7 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
         <>
           {/* Overlay */}
           <motion.div
-            className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -26,7 +26,7 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
 
           {/* Sheet */}
           <motion.div
-            className="fixed inset-x-0 bottom-0 z-50 bg-card rounded-t-[32px] shadow-card-lg max-h-[85vh] flex flex-col"
+            className="fixed inset-x-0 bottom-0 z-[70] bg-card rounded-t-[32px] shadow-card-lg max-h-[85vh] flex flex-col"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
