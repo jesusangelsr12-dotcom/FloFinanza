@@ -39,14 +39,30 @@ export function useSalary() {
   const updateSalary = async (updates: Partial<SalarySettings>) => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return false
+    if (!user) {
+      console.error('useSalary: no authenticated user')
+      return false
+    }
 
-    const { error } = await supabase
+    // Check if row exists to decide between UPDATE and INSERT
+    // (avoids RLS issues with upsert when WITH CHECK is implicit)
+    const { data: existing } = await supabase
       .from('user_settings')
-      .upsert(
-        { user_id: user.id, ...updates, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' }
-      )
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    let error
+    if (existing) {
+      ;({ error } = await supabase
+        .from('user_settings')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('user_id', user.id))
+    } else {
+      ;({ error } = await supabase
+        .from('user_settings')
+        .insert({ user_id: user.id, ...updates, updated_at: new Date().toISOString() }))
+    }
 
     if (error) {
       console.error('useSalary updateSalary error:', error.message, error)

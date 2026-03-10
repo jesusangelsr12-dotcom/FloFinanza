@@ -34,6 +34,7 @@ export function mockSupabaseQuery(data: unknown = [], error: unknown = null) {
   chain.order = vi.fn().mockReturnValue(chain)
   chain.limit = vi.fn().mockReturnValue(chain)
   chain.single = vi.fn().mockResolvedValue({ data, error })
+  chain.maybeSingle = vi.fn().mockResolvedValue({ data, error })
 
   // Make terminal methods resolve
   chain.then = vi.fn((resolve: (val: unknown) => void) => resolve({ data, error }))
