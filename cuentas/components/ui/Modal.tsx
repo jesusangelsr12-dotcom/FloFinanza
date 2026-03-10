@@ -26,24 +26,24 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
 
           {/* Sheet */}
           <motion.div
-            className="fixed inset-x-0 bottom-0 z-50 bg-card rounded-t-[32px] shadow-card-lg"
+            className="fixed inset-x-0 bottom-0 z-50 bg-card rounded-t-[32px] shadow-card-lg max-h-[85vh] flex flex-col"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
           >
             {/* Handle */}
-            <div className="pt-3 pb-2">
+            <div className="pt-3 pb-2 flex-shrink-0">
               <div className="w-9 h-1 bg-border-2 rounded-full mx-auto" />
             </div>
 
             {title && (
-              <h2 className="font-display text-lg font-bold text-ink px-5 pb-3">
+              <h2 className="font-display text-lg font-bold text-ink px-5 pb-3 flex-shrink-0">
                 {title}
               </h2>
             )}
 
-            <div className="px-5 pb-8">{children}</div>
+            <div className="px-5 pb-8 overflow-y-auto no-scrollbar">{children}</div>
           </motion.div>
         </>
       )}

@@ -4,66 +4,68 @@ import { useState } from 'react'
 import BudgetCard from '@/components/budgets/BudgetCard'
 import Modal from '@/components/ui/Modal'
 import { formatMXN } from '@/lib/utils/currency'
+import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useSalary } from '@/lib/hooks/useSalary'
+import { frequencyLabel, daysUntil } from '@/lib/utils/dates'
 
-const mockBudgets = [
-  {
-    id: '1',
-    name: 'Viaje / Vacaciones',
-    icon: '✈️',
-    accumulated: 3400,
-    budgetAmount: 5000,
-    amountPerPeriod: 2500,
-    periodLabel: 'quincena',
-    gradientFrom: '#3B82F6',
-    gradientTo: '#2563EB',
-  },
-  {
-    id: '2',
-    name: 'Gastos del hogar',
-    icon: '🏠',
-    accumulated: 2250,
-    budgetAmount: 5000,
-    amountPerPeriod: 2500,
-    periodLabel: 'quincena',
-    gradientFrom: '#00C07F',
-    gradientTo: '#059669',
-  },
-  {
-    id: '3',
-    name: 'Comida / Restaurantes',
-    icon: '🍔',
-    accumulated: 2590,
-    budgetAmount: 2000,
-    amountPerPeriod: 2000,
-    periodLabel: 'quincena',
-    gradientFrom: '#FF4060',
-    gradientTo: '#E11D48',
-  },
-  {
-    id: '4',
-    name: 'Salud / Medicamentos',
-    icon: '💊',
-    accumulated: 1500,
-    budgetAmount: 5000,
-    amountPerPeriod: 2500,
-    periodLabel: 'quincena',
-    gradientFrom: '#8B5CF6',
-    gradientTo: '#7C3AED',
-  },
+const GRADIENT_PRESETS = [
+  { from: '#3B82F6', to: '#2563EB' },
+  { from: '#00C07F', to: '#059669' },
+  { from: '#FF4060', to: '#E11D48' },
+  { from: '#8B5CF6', to: '#7C3AED' },
+  { from: '#F59E0B', to: '#D97706' },
+  { from: '#06B6D4', to: '#0891B2' },
 ]
 
 export default function BudgetsPage() {
+  const { budgets, loading, addBudget } = useBudgets()
+  const { settings } = useSalary()
   const [showNewModal, setShowNewModal] = useState(false)
   const [newName, setNewName] = useState('')
   const [newAmount, setNewAmount] = useState('')
   const [newIcon, setNewIcon] = useState('📦')
+  const [selectedGradient, setSelectedGradient] = useState(0)
 
-  const totalAccumulated = mockBudgets.reduce((sum, b) => {
-    const effective = b.accumulated > b.budgetAmount ? b.budgetAmount - b.accumulated : b.accumulated
-    return sum + Math.max(0, b.accumulated <= b.budgetAmount ? b.accumulated : 0)
-  }, 0)
+  const totalAccumulated = budgets.reduce((sum, b) => sum + Math.max(0, b.accumulated), 0)
+
+  const freqLabel = settings
+    ? frequencyLabel(settings.salary_frequency, settings.salary_custom_days || undefined)
+    : 'Quincenal'
+
+  const nextDateStr = settings?.salary_next_date
+  const daysLeft = nextDateStr ? daysUntil(nextDateStr) : null
+  const rechargeText = daysLeft !== null && daysLeft >= 0
+    ? `${freqLabel} · proxima recarga en ${daysLeft} dia${daysLeft !== 1 ? 's' : ''}`
+    : freqLabel
 
   const icons = ['📦', '✈️', '🏠', '🍔', '💊', '🎮', '👗', '📱', '🚗', '💳', '🎓', '💰']
+
+  const periodLabel = settings?.salary_frequency === 'monthly'
+    ? 'mes'
+    : settings?.salary_frequency === 'weekly'
+    ? 'semana'
+    : 'quincena'
+
+  const handleCreate = async () => {
+    if (!newName.trim() || !newAmount) return
+    const gradient = GRADIENT_PRESETS[selectedGradient]
+    await addBudget({
+      name: newName.trim(),
+      icon: newIcon,
+      color: null,
+      gradient_from: gradient.from,
+      gradient_to: gradient.to,
+      amount: Number(newAmount),
+      period_days: settings?.salary_frequency === 'monthly' ? 30
+        : settings?.salary_frequency === 'weekly' ? 7
+        : settings?.salary_custom_days || 14,
+    })
+    setShowNewModal(false)
+    setNewName('')
+    setNewAmount('')
+    setNewIcon('📦')
+    setSelectedGradient(0)
+  }
 
   return (
     <div className="px-5 no-scrollbar">
@@ -73,7 +75,7 @@ export default function BudgetsPage() {
         <div className="font-display text-[32px] font-black text-ink tracking-[-1px]">
           {formatMXN(totalAccumulated)}
         </div>
-        <div className="text-xs text-ink-3 mt-1.5">Quincenal · próxima recarga en 6 días</div>
+        <div className="text-xs text-ink-3 mt-1.5">{rechargeText}</div>
       </div>
 
       {/* Section header */}
@@ -88,19 +90,44 @@ export default function BudgetsPage() {
       </div>
 
       {/* Budget Cards */}
-      {mockBudgets.map((budget) => (
-        <BudgetCard
-          key={budget.id}
-          name={budget.name}
-          icon={budget.icon}
-          accumulated={budget.accumulated}
-          budgetAmount={budget.budgetAmount}
-          amountPerPeriod={budget.amountPerPeriod}
-          periodLabel={budget.periodLabel}
-          gradientFrom={budget.gradientFrom}
-          gradientTo={budget.gradientTo}
-        />
-      ))}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-6 h-6 border-2 border-ink/20 border-t-ink rounded-full animate-spin" />
+        </div>
+      ) : budgets.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="w-16 h-16 rounded-[20px] bg-accent-purple-bg flex items-center justify-center mb-4">
+            <span className="text-2xl">📦</span>
+          </div>
+          <p className="font-display text-base font-bold text-ink mb-1">Sin cajitas</p>
+          <p className="text-sm text-ink-3 text-center mb-4">Crea tu primera cajita para empezar a organizar tus gastos.</p>
+          <button
+            onClick={() => setShowNewModal(true)}
+            className="px-6 py-3 rounded-pill bg-ink text-white font-display text-sm font-bold"
+          >
+            Crear cajita
+          </button>
+        </div>
+      ) : (
+        budgets.map((budget) => {
+          const gradient = budget.gradient_from && budget.gradient_to
+            ? { from: budget.gradient_from, to: budget.gradient_to }
+            : GRADIENT_PRESETS[0]
+          return (
+            <BudgetCard
+              key={budget.id}
+              name={budget.name}
+              icon={budget.icon || '📦'}
+              accumulated={budget.accumulated}
+              budgetAmount={budget.amount}
+              amountPerPeriod={budget.amount}
+              periodLabel={periodLabel}
+              gradientFrom={gradient.from}
+              gradientTo={gradient.to}
+            />
+          )
+        })
+      )}
 
       {/* New Budget Modal */}
       <Modal
@@ -154,14 +181,25 @@ export default function BudgetsPage() {
             </div>
           </div>
 
+          <div>
+            <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Color</label>
+            <div className="flex gap-2">
+              {GRADIENT_PRESETS.map((g, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedGradient(i)}
+                  className={`w-10 h-10 rounded-full transition-all ${
+                    selectedGradient === i ? 'ring-2 ring-offset-2 ring-ink' : ''
+                  }`}
+                  style={{ background: `linear-gradient(135deg, ${g.from}, ${g.to})` }}
+                />
+              ))}
+            </div>
+          </div>
+
           <button
-            onClick={() => {
-              // TODO: Save to Supabase
-              setShowNewModal(false)
-              setNewName('')
-              setNewAmount('')
-            }}
-            disabled={!newName || !newAmount}
+            onClick={handleCreate}
+            disabled={!newName.trim() || !newAmount}
             className="w-full py-4 rounded-pill bg-ink text-white font-display text-base font-extrabold shadow-fab hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40"
           >
             Crear cajita

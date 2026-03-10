@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, DollarSign, Tag, ChevronRight, PieChart, Plus, Trash2, Percent, Hash } from 'lucide-react'
 import Link from 'next/link'
 import { useDistribution } from '@/lib/hooks/useDistribution'
 import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useSalary } from '@/lib/hooks/useSalary'
 import { formatMXN } from '@/lib/utils/currency'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
@@ -18,10 +19,20 @@ const frequencies = [
 ]
 
 export default function SettingsPage() {
+  const { settings, updateSalary } = useSalary()
   const [salary, setSalary] = useState('16000')
   const [frequency, setFrequency] = useState('biweekly')
   const [customDays, setCustomDays] = useState('14')
   const [saved, setSaved] = useState(false)
+
+  // Load persisted salary settings
+  useEffect(() => {
+    if (settings) {
+      if (settings.salary) setSalary(String(settings.salary))
+      if (settings.salary_frequency) setFrequency(settings.salary_frequency)
+      if (settings.salary_custom_days) setCustomDays(String(settings.salary_custom_days))
+    }
+  }, [settings])
 
   // Distribution
   const { rules, addRule, deleteRule, totalPercent, canAddPercentRule } = useDistribution()
@@ -31,8 +42,12 @@ export default function SettingsPage() {
   const [distType, setDistType] = useState<'percent' | 'fixed'>('percent')
   const [distValue, setDistValue] = useState('')
 
-  const handleSave = () => {
-    // TODO: Save to Supabase
+  const handleSave = async () => {
+    await updateSalary({
+      salary: Number(salary) || null,
+      salary_frequency: frequency,
+      salary_custom_days: frequency === 'custom' ? Number(customDays) || null : null,
+    })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }

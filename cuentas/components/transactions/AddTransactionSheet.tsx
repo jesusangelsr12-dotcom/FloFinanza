@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Zap } from 'lucide-react'
+import { X, Zap, ChevronDown } from 'lucide-react'
 import CategoryPicker from './CategoryPicker'
+import { useTransactions } from '@/lib/hooks/useTransactions'
+import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useCards } from '@/lib/hooks/useCards'
 import { useDistribution } from '@/lib/hooks/useDistribution'
 import { formatMXN } from '@/lib/utils/currency'
 
@@ -12,22 +15,23 @@ interface AddTransactionSheetProps {
   onClose: () => void
 }
 
-const paymentMethods = [
-  { id: 'cash', label: 'Efectivo' },
-  { id: 'debit', label: 'Débito' },
-]
-
 export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionSheetProps) {
   const [type, setType] = useState<'expense' | 'income'>('expense')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedCardId, setSelectedCardId] = useState<string>('')
   const [selectedMethod, setSelectedMethod] = useState('cash')
+  const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [isShared, setIsShared] = useState(false)
   const [distributeEnabled, setDistributeEnabled] = useState(false)
-  const [distributed, setDistributed] = useState(false)
+  const [saving, setSaving] = useState(false)
 
+  const { addTransaction } = useTransactions()
+  const { budgets } = useBudgets()
+  const { cards } = useCards()
   const { hasRules, getPreview, distributeIncome } = useDistribution()
+
   const amountNum = Number(amount) || 0
   const preview = distributeEnabled && amountNum > 0 ? getPreview(amountNum) : null
 
@@ -42,23 +46,61 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
     ? Number(amount).toLocaleString('es-MX')
     : '0'
 
-  const handleSubmit = async () => {
-    // TODO: Save transaction to Supabase
-
-    // Distribute income to cajitas if enabled
-    if (type === 'income' && distributeEnabled && amountNum > 0) {
-      await distributeIncome(amountNum)
-      setDistributed(true)
-      setTimeout(() => setDistributed(false), 2000)
-    }
-
-    onClose()
+  const resetForm = () => {
     setAmount('')
     setDescription('')
     setSelectedCategory(null)
+    setSelectedCardId('')
+    setSelectedMethod('cash')
+    setSelectedBudgetId('')
     setIsShared(false)
     setDistributeEnabled(false)
   }
+
+  const handleSubmit = async () => {
+    if (!amount || amount === '0' || saving) return
+    setSaving(true)
+
+    try {
+      // Save transaction to Supabase
+      await addTransaction({
+        type,
+        amount: amountNum,
+        description: description || null,
+        date: new Date().toISOString().split('T')[0],
+        category_id: selectedCategory || null,
+        budget_id: selectedBudgetId || null,
+        card_id: selectedCardId || null,
+      })
+
+      // Distribute income to cajitas if enabled
+      if (type === 'income' && distributeEnabled && amountNum > 0) {
+        await distributeIncome(amountNum)
+      }
+
+      resetForm()
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Build payment method options: cash, debit, + credit cards
+  const methodOptions = [
+    { id: 'cash', label: 'Efectivo', cardId: '' },
+    { id: 'debit', label: 'Débito', cardId: '' },
+    ...cards.map((c) => ({
+      id: `card-${c.id}`,
+      label: `${c.name}${c.last_four ? ` *${c.last_four}` : ''}`,
+      cardId: c.id,
+    })),
+  ]
+
+  const selectedMethodLabel = methodOptions.find((m) =>
+    selectedCardId ? m.cardId === selectedCardId : m.id === selectedMethod
+  )?.label || 'Efectivo'
+
+  const selectedBudgetLabel = budgets.find((b) => b.id === selectedBudgetId)?.name || 'Ninguna'
 
   return (
     <AnimatePresence>
@@ -153,37 +195,66 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
               <div className="grid grid-cols-2 gap-2.5 mb-3.5">
                 <div>
                   <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Tarjeta / Método</label>
-                  <div className="w-full p-3.5 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink flex justify-between items-center cursor-pointer hover:border-accent-blue transition">
-                    <span>{selectedMethod === 'cash' ? 'Efectivo' : 'Débito'}</span>
-                    <span className="text-ink-3">›</span>
+                  <div className="relative">
+                    <select
+                      value={selectedCardId ? `card-${selectedCardId}` : selectedMethod}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        const option = methodOptions.find((m) => m.id === val)
+                        if (option?.cardId) {
+                          setSelectedCardId(option.cardId)
+                          setSelectedMethod('')
+                        } else {
+                          setSelectedCardId('')
+                          setSelectedMethod(val)
+                        }
+                      }}
+                      className="w-full p-3.5 pr-8 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink outline-none appearance-none focus:border-accent-blue transition"
+                    >
+                      {methodOptions.map((m) => (
+                        <option key={m.id} value={m.id}>{m.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 pointer-events-none" />
                   </div>
                 </div>
                 <div>
                   <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Cajita</label>
-                  <div className="w-full p-3.5 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink flex justify-between items-center cursor-pointer hover:border-accent-blue transition">
-                    <span className="text-ink-3">Ninguna</span>
-                    <span className="text-ink-3">›</span>
+                  <div className="relative">
+                    <select
+                      value={selectedBudgetId}
+                      onChange={(e) => setSelectedBudgetId(e.target.value)}
+                      className="w-full p-3.5 pr-8 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink outline-none appearance-none focus:border-accent-blue transition"
+                    >
+                      <option value="">Ninguna</option>
+                      {budgets.map((b) => (
+                        <option key={b.id} value={b.id}>{b.icon || '📦'} {b.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 pointer-events-none" />
                   </div>
                 </div>
               </div>
 
               {/* Shared expense toggle */}
-              <div className="flex items-center justify-between bg-bg rounded-sm p-3.5 mb-5">
-                <div>
-                  <div className="font-display text-xs font-bold text-ink-2 mb-0.5">¿Gasto compartido?</div>
-                  <div className="text-xs text-ink-3">Dividir con otras personas</div>
+              {type === 'expense' && (
+                <div className="flex items-center justify-between bg-bg rounded-sm p-3.5 mb-5">
+                  <div>
+                    <div className="font-display text-xs font-bold text-ink-2 mb-0.5">¿Gasto compartido?</div>
+                    <div className="text-xs text-ink-3">Dividir con otras personas</div>
+                  </div>
+                  <button
+                    onClick={() => setIsShared(!isShared)}
+                    className={`w-11 h-[26px] rounded-full relative transition-colors ${
+                      isShared ? 'bg-ink' : 'bg-border-2'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-[3px] shadow transition-transform ${
+                      isShared ? 'right-[3px]' : 'left-[3px]'
+                    }`} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsShared(!isShared)}
-                  className={`w-11 h-[26px] rounded-full relative transition-colors ${
-                    isShared ? 'bg-ink' : 'bg-border-2'
-                  }`}
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full absolute top-[3px] shadow transition-transform ${
-                    isShared ? 'right-[3px]' : 'left-[3px]'
-                  }`} />
-                </button>
-              </div>
+              )}
 
               {/* Income Distribution Toggle */}
               {type === 'income' && hasRules && (
@@ -254,14 +325,16 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
               {/* Submit */}
               <button
                 onClick={handleSubmit}
-                disabled={!amount || amount === '0'}
+                disabled={!amount || amount === '0' || saving}
                 className={`w-full py-4 rounded-pill font-display text-base font-extrabold shadow-fab hover:shadow-card-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                   type === 'income' && distributeEnabled
                     ? 'bg-accent-green text-white'
                     : 'bg-ink text-white'
                 }`}
               >
-                {type === 'expense'
+                {saving
+                  ? 'Guardando...'
+                  : type === 'expense'
                   ? 'Guardar gasto'
                   : distributeEnabled
                   ? 'Guardar y distribuir'

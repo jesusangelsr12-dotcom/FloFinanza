@@ -1,32 +1,55 @@
 'use client'
 
-import { Bell } from 'lucide-react'
+import { Bell, Settings } from 'lucide-react'
 import TransactionItem from '@/components/transactions/TransactionItem'
 import Link from 'next/link'
+import { useTransactions } from '@/lib/hooks/useTransactions'
+import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useCards } from '@/lib/hooks/useCards'
+import { useMSI } from '@/lib/hooks/useMSI'
+import { formatMXN } from '@/lib/utils/currency'
+import { getGreeting, getMonthName } from '@/lib/utils/dates'
 
-// Mock data — will be replaced by Supabase queries
-const mockTransactions = [
-  { icon: '🛒', iconBg: '#FFF0F3', name: 'Super Walmart', meta: 'Despensa · BBVA Azul', amount: 1240, type: 'expense' as const, date: new Date().toISOString() },
-  { icon: '💼', iconBg: '#E8F8EE', name: 'Nómina', meta: 'Salario quincenal', amount: 16000, type: 'income' as const, date: new Date(Date.now() - 86400000).toISOString() },
-  { icon: '⛽', iconBg: '#ECFEFF', name: 'Gasolinera', meta: 'Transporte · Efectivo', amount: 650, type: 'expense' as const, date: new Date(Date.now() - 86400000 * 2).toISOString() },
-  { icon: '🍕', iconBg: '#FFF3EE', name: "Domino's Pizza", meta: 'Comida · con Rodrigo, Ana', amount: 480, type: 'expense' as const, date: new Date(Date.now() - 86400000 * 3).toISOString() },
-]
-
-const quickAccess = [
-  { icon: '💳', name: 'Tarjetas', sub: '2 activas · $4,200', href: '/cards', bg: '#EEF4FF' },
-  { icon: '📦', name: 'Cajitas', sub: '5 fondos activos', href: '/budgets', bg: '#F3EEFF' },
-  { icon: '🤝', name: 'Te deben', sub: '3 personas · $1,800', href: '/splits', bg: '#ECFEFF' },
-  { icon: '📊', name: 'MSI activos', sub: '4 planes · $680/mes', href: '/msi', bg: '#FFF3EE' },
-]
-
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Buenos días'
-  if (h < 18) return 'Buenas tardes'
-  return 'Buenas noches'
+const categoryMeta: Record<string, { icon: string; bg: string }> = {
+  groceries: { icon: '🛒', bg: '#FFF0F3' },
+  food: { icon: '🍕', bg: '#FFF3EE' },
+  transport: { icon: '⛽', bg: '#ECFEFF' },
+  health: { icon: '💊', bg: '#F3EEFF' },
+  entertainment: { icon: '🎮', bg: '#EEF4FF' },
+  home: { icon: '🏠', bg: '#E8F8EE' },
+  clothing: { icon: '👗', bg: '#FFF0F3' },
+  salary: { icon: '💼', bg: '#E8F8EE' },
+  freelance: { icon: '💻', bg: '#EEF4FF' },
+  investment: { icon: '📈', bg: '#F3EEFF' },
+  gift: { icon: '🎁', bg: '#FFF3EE' },
+  refund: { icon: '↩️', bg: '#ECFEFF' },
 }
+const defaultMeta = { icon: '💰', bg: '#F4F4F6' }
 
 export default function HomePage() {
+  const { transactions } = useTransactions()
+  const { budgets } = useBudgets()
+  const { cards } = useCards()
+  const { activePlans, totalMonthlyMSI } = useMSI()
+
+  const now = new Date()
+  const monthLabel = getMonthName(now)
+
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const monthTx = transactions.filter((t) => new Date(t.date) >= startOfMonth)
+  const totalIncome = monthTx.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+  const totalExpense = monthTx.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+  const balance = totalIncome - totalExpense
+
+  const recentTx = transactions.slice(0, 5)
+
+  const quickAccess = [
+    { icon: '💳', name: 'Tarjetas', sub: `${cards.length} activa${cards.length !== 1 ? 's' : ''}`, href: '/cards', bg: '#EEF4FF' },
+    { icon: '📦', name: 'Cajitas', sub: `${budgets.length} fondo${budgets.length !== 1 ? 's' : ''} activo${budgets.length !== 1 ? 's' : ''}`, href: '/budgets', bg: '#F3EEFF' },
+    { icon: '🤝', name: 'Te deben', sub: 'Gastos compartidos', href: '/splits', bg: '#ECFEFF' },
+    { icon: '📊', name: 'MSI activos', sub: `${activePlans.length} plan${activePlans.length !== 1 ? 'es' : ''} · ${formatMXN(totalMonthlyMSI)}/mes`, href: '/msi', bg: '#FFF3EE' },
+  ]
+
   return (
     <div className="px-5 no-scrollbar">
       {/* Header */}
@@ -40,15 +63,19 @@ export default function HomePage() {
             <div className="font-display text-lg font-extrabold text-ink">Jesús</div>
           </div>
         </div>
-        <button className="w-10 h-10 rounded-full bg-bg border border-border flex items-center justify-center relative">
-          <Bell size={18} className="text-ink" />
-          <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent-red border-2 border-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <Link href="/settings" className="w-10 h-10 rounded-full bg-bg border border-border flex items-center justify-center">
+            <Settings size={18} className="text-ink" />
+          </Link>
+          <button className="w-10 h-10 rounded-full bg-bg border border-border flex items-center justify-center relative">
+            <Bell size={18} className="text-ink" />
+            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent-red border-2 border-white" />
+          </button>
+        </div>
       </div>
 
       {/* Hero Balance Card */}
       <div className="bg-ink rounded-[28px] p-6 pb-6 relative overflow-hidden mb-4">
-        {/* Decorative circles */}
         <div className="absolute -top-[50px] -right-[30px] w-[200px] h-[200px] rounded-full bg-white/[0.04] pointer-events-none" />
         <div className="absolute -bottom-20 -left-5 w-[180px] h-[180px] rounded-full bg-white/[0.025] pointer-events-none" />
 
@@ -56,10 +83,10 @@ export default function HomePage() {
           Balance este mes
         </div>
         <div className="font-display text-[52px] font-black text-white tracking-[-2.5px] leading-none mb-1">
-          $18,430
+          {formatMXN(balance)}
         </div>
-        <div className="text-[13px] text-white/40 mb-5">
-          Marzo 2026 · Quincenal
+        <div className="text-[13px] text-white/40 mb-5 capitalize">
+          {monthLabel}
         </div>
         <div className="h-px bg-white/[0.08] mb-4" />
         <div className="flex">
@@ -67,14 +94,14 @@ export default function HomePage() {
             <div className="text-[11px] text-white/40 mb-1.5">Ingresos</div>
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" />
-              <span className="font-display text-[17px] font-extrabold text-[#4ADE80]">$32,000</span>
+              <span className="font-display text-[17px] font-extrabold text-[#4ADE80]">{formatMXN(totalIncome)}</span>
             </div>
           </div>
           <div className="flex-1">
             <div className="text-[11px] text-white/40 mb-1.5">Gastos</div>
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-[#FB7185]" />
-              <span className="font-display text-[17px] font-extrabold text-[#FB7185]">$13,570</span>
+              <span className="font-display text-[17px] font-extrabold text-[#FB7185]">{formatMXN(totalExpense)}</span>
             </div>
           </div>
         </div>
@@ -103,15 +130,32 @@ export default function HomePage() {
       {/* Transactions */}
       <div className="flex items-center justify-between my-5">
         <span className="font-display text-[15px] font-extrabold text-ink">Últimos movimientos</span>
-        <span className="font-display text-[13px] font-bold text-accent-blue cursor-pointer">Ver todos</span>
+        <Link href="/transactions" className="font-display text-[13px] font-bold text-accent-blue">Ver todos</Link>
       </div>
-      <div className="bg-white border border-border rounded-card overflow-hidden">
-        {mockTransactions.map((tx, i) => (
-          <div key={i} className={i < mockTransactions.length - 1 ? 'border-b border-border' : ''}>
-            <TransactionItem {...tx} />
-          </div>
-        ))}
-      </div>
+      {recentTx.length === 0 ? (
+        <div className="bg-white border border-border rounded-card p-8 text-center">
+          <p className="text-sm text-ink-3">Aun no hay movimientos. Presiona + para agregar.</p>
+        </div>
+      ) : (
+        <div className="bg-white border border-border rounded-card overflow-hidden">
+          {recentTx.map((tx, i) => {
+            const meta = categoryMeta[tx.category_id || ''] || defaultMeta
+            return (
+              <div key={tx.id} className={i < recentTx.length - 1 ? 'border-b border-border' : ''}>
+                <TransactionItem
+                  icon={meta.icon}
+                  iconBg={meta.bg}
+                  name={tx.description || (tx.type === 'income' ? 'Ingreso' : 'Gasto')}
+                  meta={tx.category_id || ''}
+                  amount={tx.amount}
+                  type={tx.type}
+                  date={tx.date}
+                />
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
