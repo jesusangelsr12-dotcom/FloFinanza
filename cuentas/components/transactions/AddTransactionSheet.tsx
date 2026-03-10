@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X, Zap } from 'lucide-react'
 import CategoryPicker from './CategoryPicker'
+import { useDistribution } from '@/lib/hooks/useDistribution'
+import { formatMXN } from '@/lib/utils/currency'
 
 interface AddTransactionSheetProps {
   isOpen: boolean
@@ -22,6 +24,12 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedMethod, setSelectedMethod] = useState('cash')
   const [isShared, setIsShared] = useState(false)
+  const [distributeEnabled, setDistributeEnabled] = useState(false)
+  const [distributed, setDistributed] = useState(false)
+
+  const { hasRules, getPreview, distributeIncome } = useDistribution()
+  const amountNum = Number(amount) || 0
+  const preview = distributeEnabled && amountNum > 0 ? getPreview(amountNum) : null
 
   const handleAmountChange = (value: string) => {
     const cleaned = value.replace(/[^0-9]/g, '')
@@ -34,13 +42,22 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
     ? Number(amount).toLocaleString('es-MX')
     : '0'
 
-  const handleSubmit = () => {
-    // TODO: Save to Supabase
+  const handleSubmit = async () => {
+    // TODO: Save transaction to Supabase
+
+    // Distribute income to cajitas if enabled
+    if (type === 'income' && distributeEnabled && amountNum > 0) {
+      await distributeIncome(amountNum)
+      setDistributed(true)
+      setTimeout(() => setDistributed(false), 2000)
+    }
+
     onClose()
     setAmount('')
     setDescription('')
     setSelectedCategory(null)
     setIsShared(false)
+    setDistributeEnabled(false)
   }
 
   return (
@@ -168,13 +185,87 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
                 </button>
               </div>
 
+              {/* Income Distribution Toggle */}
+              {type === 'income' && hasRules && (
+                <div className="mb-5">
+                  <div className="flex items-center justify-between bg-accent-blue-bg rounded-sm p-3.5 mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <Zap size={16} className="text-accent-blue" />
+                      <div>
+                        <div className="font-display text-xs font-bold text-accent-blue">Distribuir a cajitas</div>
+                        <div className="text-[11px] text-accent-blue/70">Reparte automaticamente tu ingreso</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setDistributeEnabled(!distributeEnabled)}
+                      className={`w-11 h-[26px] rounded-full relative transition-colors ${
+                        distributeEnabled ? 'bg-accent-blue' : 'bg-border-2'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-[3px] shadow transition-transform ${
+                        distributeEnabled ? 'right-[3px]' : 'left-[3px]'
+                      }`} />
+                    </button>
+                  </div>
+
+                  {/* Distribution preview */}
+                  {preview && preview.items.length > 0 && (
+                    <div className="bg-white border border-border rounded-card p-4">
+                      <p className="font-display text-xs font-bold text-ink-2 mb-3">Vista previa de distribucion</p>
+                      <div className="space-y-2">
+                        {preview.items.map((item) => (
+                          <div key={item.budget_id} className="flex items-center gap-2.5">
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs"
+                              style={{
+                                background: item.budget_color ? `${item.budget_color}20` : '#EEF4FF',
+                              }}
+                            >
+                              {item.budget_icon || '📦'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-display text-xs font-bold text-ink truncate">{item.budget_name}</p>
+                              <p className="text-[11px] text-ink-3">
+                                {item.allocation_type === 'percent'
+                                  ? `${item.allocation_value}%`
+                                  : formatMXN(item.allocation_value)}
+                              </p>
+                            </div>
+                            <p className="font-display text-sm font-extrabold text-accent-green">
+                              {formatMXN(item.calculated_amount)}
+                            </p>
+                          </div>
+                        ))}
+                        {preview.unassigned > 0 && (
+                          <div className="flex items-center gap-2.5 pt-2 border-t border-border">
+                            <div className="w-8 h-8 rounded-lg bg-bg flex items-center justify-center text-xs">💰</div>
+                            <div className="flex-1">
+                              <p className="font-display text-xs font-bold text-ink-3">Sin asignar</p>
+                            </div>
+                            <p className="font-display text-sm font-bold text-ink-3">{formatMXN(preview.unassigned)}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Submit */}
               <button
                 onClick={handleSubmit}
                 disabled={!amount || amount === '0'}
-                className="w-full py-4 rounded-pill bg-ink text-white font-display text-base font-extrabold shadow-fab hover:shadow-card-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`w-full py-4 rounded-pill font-display text-base font-extrabold shadow-fab hover:shadow-card-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  type === 'income' && distributeEnabled
+                    ? 'bg-accent-green text-white'
+                    : 'bg-ink text-white'
+                }`}
               >
-                {type === 'expense' ? 'Guardar gasto' : 'Guardar ingreso'}
+                {type === 'expense'
+                  ? 'Guardar gasto'
+                  : distributeEnabled
+                  ? 'Guardar y distribuir'
+                  : 'Guardar ingreso'}
               </button>
             </div>
           </motion.div>
