@@ -48,14 +48,16 @@ export function useSalary() {
         { onConflict: 'user_id' }
       )
 
-    if (!error) {
-      setSettings((prev) => prev
-        ? { ...prev, ...updates }
-        : { salary: null, salary_frequency: 'biweekly', salary_custom_days: null, salary_next_date: null, ...updates }
-      )
-      return true
+    if (error) {
+      console.error('useSalary updateSalary error:', error.message, error)
+      return false
     }
-    return false
+
+    setSettings((prev) => prev
+      ? { ...prev, ...updates }
+      : { salary: null, salary_frequency: 'biweekly', salary_custom_days: null, salary_next_date: null, ...updates }
+    )
+    return true
   }
 
   useEffect(() => {

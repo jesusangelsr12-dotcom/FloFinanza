@@ -202,4 +202,43 @@ describe('Settings Page', () => {
 
     expect(screen.getByText('A partir de esta fecha se calcula cada cuándo recibes tu salario')).toBeInTheDocument()
   })
+
+  it('should show error message when save fails', async () => {
+    mockUpdateSalary.mockResolvedValueOnce(false)
+
+    render(<SettingsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('16000')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Guardar salario'))
+
+    await waitFor(() => {
+      expect(screen.getByText('No se pudo guardar. Verifica tu conexión o inicia sesión de nuevo.')).toBeInTheDocument()
+    })
+  })
+
+  it('should show loading state while saving', async () => {
+    let resolveUpdate: (value: boolean) => void
+    mockUpdateSalary.mockImplementationOnce(() => new Promise((resolve) => { resolveUpdate = resolve }))
+
+    render(<SettingsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('16000')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Guardar salario'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Guardando...')).toBeInTheDocument()
+    })
+
+    resolveUpdate!(true)
+
+    await waitFor(() => {
+      expect(screen.getByText('✓ Guardado')).toBeInTheDocument()
+    })
+  })
 })

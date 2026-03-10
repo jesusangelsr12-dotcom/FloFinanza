@@ -29,6 +29,8 @@ export default function SettingsPage() {
   const [customDays, setCustomDays] = useState('14')
   const [nextDate, setNextDate] = useState('')
   const [salarySaved, setSalarySaved] = useState(false)
+  const [salarySaving, setSalarySaving] = useState(false)
+  const [salaryError, setSalaryError] = useState('')
 
   // Category modal state
   const [showCatModal, setShowCatModal] = useState(false)
@@ -60,14 +62,26 @@ export default function SettingsPage() {
   }, [settings])
 
   const handleSaveSalary = async () => {
-    const ok = await updateSalary({
-      salary: Number(salary) || null,
-      salary_frequency: frequency,
-      salary_custom_days: frequency === 'custom' ? Number(customDays) || null : null,
-      salary_next_date: nextDate || null,
-    })
-    setSalarySaved(!!ok)
-    if (ok) setTimeout(() => setSalarySaved(false), 2000)
+    setSalarySaving(true)
+    setSalaryError('')
+    try {
+      const ok = await updateSalary({
+        salary: Number(salary) || null,
+        salary_frequency: frequency,
+        salary_custom_days: frequency === 'custom' ? Number(customDays) || null : null,
+        salary_next_date: nextDate || null,
+      })
+      if (ok) {
+        setSalarySaved(true)
+        setTimeout(() => setSalarySaved(false), 2000)
+      } else {
+        setSalaryError('No se pudo guardar. Verifica tu conexión o inicia sesión de nuevo.')
+      }
+    } catch {
+      setSalaryError('Error inesperado al guardar. Intenta de nuevo.')
+    } finally {
+      setSalarySaving(false)
+    }
   }
 
   const handleAddCategory = async () => {
@@ -211,15 +225,29 @@ export default function SettingsPage() {
             <p className="text-[11px] text-ink-3 mt-1">A partir de esta fecha se calcula cada cuándo recibes tu salario</p>
           </div>
 
+          {salaryError && (
+            <div className="bg-accent-red-bg border border-accent-red/20 rounded-xl px-4 py-3">
+              <p className="font-body text-[12px] text-accent-red">{salaryError}</p>
+            </div>
+          )}
+
           <button
             onClick={handleSaveSalary}
+            disabled={salarySaving}
             className={`w-full py-3.5 rounded-pill font-display text-sm font-extrabold transition-all ${
               salarySaved
                 ? 'bg-accent-green text-white'
-                : 'bg-ink text-white shadow-fab hover:-translate-y-0.5 active:translate-y-0'
+                : salarySaving
+                  ? 'bg-ink/60 text-white cursor-wait'
+                  : 'bg-ink text-white shadow-fab hover:-translate-y-0.5 active:translate-y-0'
             }`}
           >
-            {salarySaved ? '✓ Guardado' : 'Guardar salario'}
+            {salarySaving ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Guardando...
+              </span>
+            ) : salarySaved ? '✓ Guardado' : 'Guardar salario'}
           </button>
         </div>
         )}
