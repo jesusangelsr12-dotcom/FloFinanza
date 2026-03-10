@@ -69,9 +69,27 @@ export function useCategories() {
     }
   }
 
+  const deleteCategory = async (id: string) => {
+    const supabase = createClient()
+    const { error } = await supabase.from('categories').delete().eq('id', id)
+    if (!error) {
+      setCategories((prev) => prev.filter((c) => c.id !== id))
+    }
+  }
+
+  const deleteGroup = async (id: string) => {
+    const supabase = createClient()
+    const { error } = await supabase.from('category_groups').delete().eq('id', id)
+    if (!error) {
+      setGroups((prev) => prev.filter((g) => g.id !== id))
+      // Categories in this group get group_id set to null (DB ON DELETE SET NULL)
+      setCategories((prev) => prev.map((c) => c.group_id === id ? { ...c, group_id: null } : c))
+    }
+  }
+
   useEffect(() => {
     fetchAll()
   }, [])
 
-  return { categories, groups, loading, addCategory, addGroup, refresh: fetchAll }
+  return { categories, groups, loading, addCategory, addGroup, deleteCategory, deleteGroup, refresh: fetchAll }
 }

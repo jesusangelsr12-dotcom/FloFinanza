@@ -34,10 +34,16 @@ export function useSalary() {
 
     const { error } = await supabase
       .from('user_settings')
-      .upsert({ user_id: user.id, ...updates, updated_at: new Date().toISOString() })
+      .upsert(
+        { user_id: user.id, ...updates, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      )
 
     if (!error) {
-      setSettings((prev) => prev ? { ...prev, ...updates } : null)
+      setSettings((prev) => prev
+        ? { ...prev, ...updates }
+        : { salary: null, salary_frequency: 'biweekly', salary_custom_days: null, salary_next_date: null, ...updates }
+      )
     }
   }
 

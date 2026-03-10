@@ -77,9 +77,15 @@ export function useBudgets() {
     }
   }
 
+  const deleteBudget = async (id: string) => {
+    const supabase = createClient()
+    await supabase.from('budgets').update({ is_active: false }).eq('id', id)
+    setBudgets((prev) => prev.filter((b) => b.id !== id))
+  }
+
   useEffect(() => {
     fetchBudgets()
   }, [])
 
-  return { budgets, loading, addBudget, addMovement, refresh: fetchBudgets }
+  return { budgets, loading, addBudget, addMovement, deleteBudget, refresh: fetchBudgets }
 }
