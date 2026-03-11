@@ -60,7 +60,7 @@ describe('useSalary', () => {
     expect(result.current.settings).toBeNull()
   })
 
-  it('updateSalary should return true on success', async () => {
+  it('updateSalary should return ok on success', async () => {
     // First call: fetch (returns existing settings)
     mockSupabaseQuery({
       salary: 10000,
@@ -78,15 +78,15 @@ describe('useSalary', () => {
     // Configure for upsert
     mockSupabaseQuery(null, null)
 
-    let ok: boolean | undefined
+    let res: { ok: boolean; error?: string } | undefined
     await act(async () => {
-      ok = await result.current.updateSalary({ salary: 20000 })
+      res = await result.current.updateSalary({ salary: 20000 })
     })
 
-    expect(ok).toBe(true)
+    expect(res?.ok).toBe(true)
   })
 
-  it('updateSalary should return false if user not authenticated', async () => {
+  it('updateSalary should return error if user not authenticated', async () => {
     mockSupabaseQuery(null)
 
     const { result } = renderHook(() => useSalary())
@@ -97,12 +97,13 @@ describe('useSalary', () => {
 
     mockAuth.getUser.mockResolvedValue({ data: { user: null } })
 
-    let ok: boolean | undefined
+    let res: { ok: boolean; error?: string } | undefined
     await act(async () => {
-      ok = await result.current.updateSalary({ salary: 20000 })
+      res = await result.current.updateSalary({ salary: 20000 })
     })
 
-    expect(ok).toBe(false)
+    expect(res?.ok).toBe(false)
+    expect(res?.error).toBeDefined()
   })
 
   it('updateSalary should update local state on success', async () => {

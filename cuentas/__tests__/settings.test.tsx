@@ -19,7 +19,7 @@ vi.mock('framer-motion', () => ({
 }))
 
 // Mock hooks
-const mockUpdateSalary = vi.fn().mockResolvedValue(true)
+const mockUpdateSalary = vi.fn().mockResolvedValue({ ok: true })
 const mockAddCategory = vi.fn()
 const mockAddGroup = vi.fn()
 const mockDeleteCategory = vi.fn()
@@ -204,7 +204,7 @@ describe('Settings Page', () => {
   })
 
   it('should show error message when save fails', async () => {
-    mockUpdateSalary.mockResolvedValueOnce(false)
+    mockUpdateSalary.mockResolvedValueOnce({ ok: false, error: 'No se pudo guardar. Verifica tu conexión o inicia sesión de nuevo.' })
 
     render(<SettingsPage />)
 
@@ -220,7 +220,7 @@ describe('Settings Page', () => {
   })
 
   it('should show loading state while saving', async () => {
-    let resolveUpdate: (value: boolean) => void
+    let resolveUpdate: (value: { ok: boolean }) => void
     mockUpdateSalary.mockImplementationOnce(() => new Promise((resolve) => { resolveUpdate = resolve }))
 
     render(<SettingsPage />)
@@ -235,7 +235,7 @@ describe('Settings Page', () => {
       expect(screen.getByText('Guardando...')).toBeInTheDocument()
     })
 
-    resolveUpdate!(true)
+    resolveUpdate!({ ok: true })
 
     await waitFor(() => {
       expect(screen.getByText('✓ Guardado')).toBeInTheDocument()

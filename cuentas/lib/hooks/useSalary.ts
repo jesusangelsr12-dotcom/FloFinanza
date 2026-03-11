@@ -36,21 +36,24 @@ export function useSalary() {
     setLoading(false)
   }
 
-  const updateSalary = async (updates: Partial<SalarySettings>) => {
+  const updateSalary = async (updates: Partial<SalarySettings>): Promise<{ ok: boolean; error?: string }> => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      console.error('useSalary: no authenticated user')
-      return false
+      return { ok: false, error: 'No hay sesión activa. Inicia sesión de nuevo.' }
     }
 
     // Check if row exists to decide between UPDATE and INSERT
     // (avoids RLS issues with upsert when WITH CHECK is implicit)
-    const { data: existing } = await supabase
+    const { data: existing, error: selectError } = await supabase
       .from('user_settings')
       .select('id')
       .eq('user_id', user.id)
       .maybeSingle()
+
+    if (selectError) {
+      return { ok: false, error: `Error al verificar datos: ${selectError.message} (${selectError.code})` }
+    }
 
     let error
     if (existing) {
@@ -65,15 +68,14 @@ export function useSalary() {
     }
 
     if (error) {
-      console.error('useSalary updateSalary error:', error.message, error)
-      return false
+      return { ok: false, error: `${error.message} (${error.code})` }
     }
 
     setSettings((prev) => prev
       ? { ...prev, ...updates }
       : { salary: null, salary_frequency: 'biweekly', salary_custom_days: null, salary_next_date: null, ...updates }
     )
-    return true
+    return { ok: true }
   }
 
   useEffect(() => {

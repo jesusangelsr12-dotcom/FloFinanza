@@ -65,17 +65,17 @@ export default function SettingsPage() {
     setSalarySaving(true)
     setSalaryError('')
     try {
-      const ok = await updateSalary({
+      const result = await updateSalary({
         salary: Number(salary) || null,
         salary_frequency: frequency,
         salary_custom_days: frequency === 'custom' ? Number(customDays) || null : null,
         salary_next_date: nextDate || null,
       })
-      if (ok) {
+      if (result.ok) {
         setSalarySaved(true)
         setTimeout(() => setSalarySaved(false), 2000)
       } else {
-        setSalaryError('No se pudo guardar. Verifica tu conexión o inicia sesión de nuevo.')
+        setSalaryError(result.error || 'No se pudo guardar. Verifica tu conexión o inicia sesión de nuevo.')
       }
     } catch {
       setSalaryError('Error inesperado al guardar. Intenta de nuevo.')
