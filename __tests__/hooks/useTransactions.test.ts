@@ -59,21 +59,18 @@ describe('useTransactions', () => {
     expect(result.current.transactions[0].id).toBe('t-new')
   })
 
-  it('should return null if user not authenticated', async () => {
+  it('should throw error if user not authenticated', async () => {
     mockSupabaseQuery([])
     const { result } = renderHook(() => useTransactions())
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     mockAuth.getUser.mockResolvedValue({ data: { user: null } })
 
-    let returnValue: unknown
     await act(async () => {
-      returnValue = await result.current.addTransaction({
+      await expect(result.current.addTransaction({
         type: 'expense', amount: 100, description: 'Test',
         date: '2026-03-10', category_id: null, budget_id: null, card_id: null,
-      })
+      })).rejects.toThrow('No hay sesión activa')
     })
-
-    expect(returnValue).toBeNull()
   })
 })
