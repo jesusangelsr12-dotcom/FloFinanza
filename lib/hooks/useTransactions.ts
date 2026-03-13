@@ -36,7 +36,7 @@ export function useTransactions() {
   const addTransaction = async (tx: Omit<Transaction, 'id' | 'created_at'>) => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return null
+    if (!user) throw new Error('No hay sesión activa')
 
     const { data, error } = await supabase
       .from('transactions')
@@ -44,9 +44,9 @@ export function useTransactions() {
       .select()
       .single()
 
-    if (!error && data) {
-      setTransactions((prev) => [data, ...prev])
-    }
+    if (error) throw new Error(error.message)
+
+    setTransactions((prev) => [data, ...prev])
     return data
   }
 

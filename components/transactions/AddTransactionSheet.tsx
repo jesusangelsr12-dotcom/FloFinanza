@@ -23,6 +23,7 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [isShared, setIsShared] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const { addTransaction } = useTransactions()
   const { budgets } = useBudgets()
@@ -54,6 +55,7 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
   const handleSubmit = async () => {
     if (!amount || amount === '0' || saving) return
     setSaving(true)
+    setError(null)
 
     try {
       await addTransaction({
@@ -68,6 +70,8 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
 
       resetForm()
       onClose()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al guardar la transacción')
     } finally {
       setSaving(false)
     }
@@ -235,6 +239,13 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
                       isShared ? 'right-[3px]' : 'left-[3px]'
                     }`} />
                   </button>
+                </div>
+              )}
+
+              {/* Error message */}
+              {error && (
+                <div className="mb-3 p-3 rounded-sm bg-red-50 border border-red-200 text-red-700 text-sm">
+                  {error}
                 </div>
               )}
 
