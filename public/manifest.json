@@ -1,0 +1,13 @@
+{
+  "name": "Cuentas",
+  "short_name": "Cuentas",
+  "description": "Finanzas personales simples y visuales",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F4F6",
+  "theme_color": "#0F0F14",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
