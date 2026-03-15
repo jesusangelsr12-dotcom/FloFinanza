@@ -43,7 +43,7 @@ export function useBudgets() {
 
     const { data, error } = await supabase
       .from('budgets')
-      .insert({ ...budget, user_id: user.id, accumulated: 0, committed: 0, is_active: true })
+      .insert({ ...budget, user_id: user.id, accumulated: 0, is_active: true })
       .select()
       .single()
 
@@ -98,7 +98,8 @@ export function useBudgets() {
 
     const budget = budgets.find((b) => b.id === budgetId)
     if (budget) {
-      const newCommitted = budget.committed + Math.abs(amount)
+      const newCommitted = (budget.committed || 0) + Math.abs(amount)
+      // committed column may not exist if migration 004 wasn't applied — ignore error
       await supabase
         .from('budgets')
         .update({ committed: newCommitted, updated_at: new Date().toISOString() })
@@ -116,16 +117,21 @@ export function useBudgets() {
     setBudgets((prev) => prev.filter((b) => b.id !== id))
   }
 
-  const resetBudget = async (id: string) => {
+  const resetBudget = async (id: string): Promise<{ ok: boolean; error?: string }> => {
     const supabase = createClient()
-    await supabase
+    const { error } = await supabase
       .from('budgets')
-      .update({ accumulated: 0, committed: 0, updated_at: new Date().toISOString() })
+      .update({ accumulated: 0, updated_at: new Date().toISOString() })
       .eq('id', id)
+
+    if (error) {
+      return { ok: false, error: error.message }
+    }
 
     setBudgets((prev) =>
       prev.map((b) => b.id === id ? { ...b, accumulated: 0, committed: 0 } : b)
     )
+    return { ok: true }
   }
 
   const distributeSalary = async (salaryAmount: number) => {

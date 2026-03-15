@@ -48,6 +48,11 @@ export default function SettingsPage() {
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string; name: string } | null>(null)
 
+  // Confirm reset
+  const [confirmReset, setConfirmReset] = useState<{ id: string; name: string } | null>(null)
+  const [resetting, setResetting] = useState(false)
+  const [resetResult, setResetResult] = useState<{ ok: boolean; name: string } | null>(null)
+
   // Help modal
   const [showHelp, setShowHelp] = useState(false)
 
@@ -110,6 +115,21 @@ export default function SettingsPage() {
     setShowGroupModal(false)
     setNewGroupName('')
     setNewGroupIcon('🏠')
+  }
+
+  const handleConfirmReset = async () => {
+    if (!confirmReset) return
+    setResetting(true)
+    const result = await resetBudget(confirmReset.id)
+    setResetting(false)
+    if (result.ok) {
+      setResetResult({ ok: true, name: confirmReset.name })
+      setTimeout(() => setResetResult(null), 2500)
+    } else {
+      setResetResult({ ok: false, name: result.error || 'Error al reiniciar' })
+      setTimeout(() => setResetResult(null), 4000)
+    }
+    setConfirmReset(null)
   }
 
   const handleConfirmDelete = async () => {
@@ -436,7 +456,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => resetBudget(b.id)}
+                    onClick={() => setConfirmReset({ id: b.id, name: b.name })}
                     className="p-1.5 text-ink-3 hover:text-accent-blue transition"
                     title="Reiniciar saldo"
                   >
@@ -670,6 +690,54 @@ export default function SettingsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* ==================== CONFIRM RESET MODAL ==================== */}
+      <Modal
+        isOpen={!!confirmReset}
+        onClose={() => setConfirmReset(null)}
+        title="Reiniciar saldo"
+      >
+        <div className="text-center">
+          <p className="font-body text-sm text-ink mb-2">
+            ¿Reiniciar el saldo de <strong>{confirmReset?.name}</strong> a $0?
+          </p>
+          <p className="font-body text-[12px] text-ink-3 mb-5">
+            Los movimientos acumulados se pondrán en cero. El presupuesto se mantiene.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setConfirmReset(null)}
+              className="flex-1 py-3.5 rounded-pill border border-border font-display text-sm font-bold text-ink-2"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirmReset}
+              disabled={resetting}
+              className="flex-1 py-3.5 rounded-pill bg-accent-blue text-white font-display text-sm font-bold"
+            >
+              {resetting ? (
+                <span className="flex items-center justify-center gap-1.5">
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </span>
+              ) : 'Reiniciar'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Reset result toast */}
+      {resetResult && (
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg font-display text-sm font-bold ${
+          resetResult.ok
+            ? 'bg-accent-green text-white'
+            : 'bg-accent-red text-white'
+        }`}>
+          {resetResult.ok
+            ? `${resetResult.name} reiniciada`
+            : resetResult.name}
+        </div>
+      )}
 
       {/* ==================== HELP / ONBOARDING MODAL ==================== */}
       <Modal isOpen={showHelp} onClose={() => setShowHelp(false)} title="Cómo empezar">
