@@ -4,26 +4,13 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import TransactionItem from '@/components/transactions/TransactionItem'
 import { useTransactions } from '@/lib/hooks/useTransactions'
+import { useCategories } from '@/lib/hooks/useCategories'
 import { formatDate } from '@/lib/utils/dates'
-
-const categoryMeta: Record<string, { icon: string; bg: string }> = {
-  groceries: { icon: '🛒', bg: '#FFF0F3' },
-  food: { icon: '🍕', bg: '#FFF3EE' },
-  transport: { icon: '⛽', bg: '#ECFEFF' },
-  health: { icon: '💊', bg: '#F3EEFF' },
-  entertainment: { icon: '🎮', bg: '#EEF4FF' },
-  home: { icon: '🏠', bg: '#E8F8EE' },
-  clothing: { icon: '👗', bg: '#FFF0F3' },
-  salary: { icon: '💼', bg: '#E8F8EE' },
-  freelance: { icon: '💻', bg: '#EEF4FF' },
-  investment: { icon: '📈', bg: '#F3EEFF' },
-  gift: { icon: '🎁', bg: '#FFF3EE' },
-  refund: { icon: '↩️', bg: '#ECFEFF' },
-}
-const defaultMeta = { icon: '💰', bg: '#F4F4F6' }
+import { resolveCategoryMeta } from '@/lib/utils/categories'
 
 export default function TransactionsPage() {
   const { transactions, loading } = useTransactions()
+  const { categories: dbCategories } = useCategories()
 
   // Group transactions by date
   const grouped: Record<string, typeof transactions> = {}
@@ -62,14 +49,14 @@ export default function TransactionsPage() {
               <p className="font-display text-xs font-bold text-ink-3 mb-2 uppercase">{formatDate(dateKey)}</p>
               <div className="bg-white border border-border rounded-card overflow-hidden">
                 {grouped[dateKey].map((tx, i) => {
-                  const meta = categoryMeta[tx.category_id || ''] || defaultMeta
+                  const { meta, name: categoryName } = resolveCategoryMeta(tx.category_id, dbCategories)
                   return (
                     <div key={tx.id} className={i < grouped[dateKey].length - 1 ? 'border-b border-border' : ''}>
                       <TransactionItem
                         icon={meta.icon}
                         iconBg={meta.bg}
                         name={tx.description || (tx.type === 'income' ? 'Ingreso' : 'Gasto')}
-                        meta={tx.category_id || ''}
+                        meta={categoryName}
                         amount={tx.amount}
                         type={tx.type}
                         date={tx.date}
