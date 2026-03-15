@@ -58,7 +58,7 @@ describe('useBudgets', () => {
 
     // Verify is_active is explicitly set
     expect(insertedData).toHaveProperty('is_active', true)
-    expect(insertedData).toHaveProperty('accumulated', 2000)
+    expect(insertedData).toHaveProperty('accumulated', 0)
     expect(result.current.budgets).toHaveLength(1)
     expect(result.current.budgets[0].name).toBe('Ocio')
   })

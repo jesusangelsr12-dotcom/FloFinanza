@@ -27,7 +27,7 @@ export default function BudgetsPage() {
   const [newType, setNewType] = useState<'expense' | 'income'>('expense')
   const [selectedGradient, setSelectedGradient] = useState(0)
 
-  const totalAccumulated = budgets.reduce((sum, b) => sum + Math.max(0, b.accumulated), 0)
+  const totalAccumulated = budgets.reduce((sum, b) => sum + Math.max(0, b.amount + b.accumulated), 0)
 
   const freqLabel = settings
     ? frequencyLabel(settings.salary_frequency, settings.salary_custom_days || undefined)
