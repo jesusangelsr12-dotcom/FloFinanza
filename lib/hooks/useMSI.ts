@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { insertTransaction } from '@/lib/utils/transactions'
 
 export interface InstallmentPlan {
   id: string
@@ -109,6 +110,19 @@ export function useMSI() {
         .from('installment_plans')
         .update({ paid_months: newPaidMonths, is_completed: isCompleted })
         .eq('id', planId)
+
+      // Create expense transaction for the MSI payment
+      const today = new Date().toISOString().split('T')[0]
+      const cardLabel = plan.card
+        ? ` · ${plan.card.name}${plan.card.last_four ? ` ••${plan.card.last_four}` : ''}`
+        : ''
+      await insertTransaction({
+        type: 'expense',
+        amount: plan.monthly_amount,
+        description: `MSI: ${plan.description} (${newPaidMonths}/${plan.total_months})${cardLabel}`,
+        date: today,
+        card_id: plan.card_id,
+      })
 
       setPlans((prev) =>
         prev.map((p) =>
