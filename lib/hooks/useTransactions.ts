@@ -33,6 +33,15 @@ export function useTransactions() {
     setLoading(false)
   }
 
+  const deleteTransaction = async (id: string) => {
+    const supabase = createClient()
+    const tx = transactions.find((t) => t.id === id)
+    const { error } = await supabase.from('transactions').delete().eq('id', id)
+    if (error) throw new Error(error.message)
+    setTransactions((prev) => prev.filter((t) => t.id !== id))
+    return tx ?? null
+  }
+
   const addTransaction = async (tx: Omit<Transaction, 'id' | 'created_at'>) => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -54,5 +63,5 @@ export function useTransactions() {
     fetchTransactions()
   }, [])
 
-  return { transactions, loading, addTransaction, refresh: fetchTransactions }
+  return { transactions, loading, addTransaction, deleteTransaction, refresh: fetchTransactions }
 }

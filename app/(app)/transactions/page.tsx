@@ -4,13 +4,24 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import TransactionItem from '@/components/transactions/TransactionItem'
 import { useTransactions } from '@/lib/hooks/useTransactions'
+import { useBudgets } from '@/lib/hooks/useBudgets'
 import { useCategories } from '@/lib/hooks/useCategories'
 import { formatDate } from '@/lib/utils/dates'
 import { resolveCategoryMeta } from '@/lib/utils/categories'
 
 export default function TransactionsPage() {
-  const { transactions, loading } = useTransactions()
+  const { transactions, loading, deleteTransaction } = useTransactions()
+  const { addMovement } = useBudgets()
   const { categories: dbCategories } = useCategories()
+
+  const handleDelete = async (tx: typeof transactions[0]) => {
+    const deleted = await deleteTransaction(tx.id)
+    // Reverse the budget movement if this transaction was linked to a cajita
+    if (deleted?.budget_id) {
+      const reverseAmount = deleted.type === 'expense' ? deleted.amount : -deleted.amount
+      await addMovement(deleted.budget_id, reverseAmount, `Eliminado: ${deleted.description || ''}`)
+    }
+  }
 
   // Group transactions by date
   const grouped: Record<string, typeof transactions> = {}
@@ -60,6 +71,7 @@ export default function TransactionsPage() {
                         amount={tx.amount}
                         type={tx.type}
                         date={tx.date}
+                        onDelete={() => handleDelete(tx)}
                       />
                     </div>
                   )

@@ -13,9 +13,9 @@ import { getGreeting, getMonthName } from '@/lib/utils/dates'
 import { resolveCategoryMeta } from '@/lib/utils/categories'
 
 export default function HomePage() {
-  const { transactions } = useTransactions()
+  const { transactions, deleteTransaction } = useTransactions()
   const { categories: dbCategories } = useCategories()
-  const { budgets } = useBudgets()
+  const { budgets, addMovement } = useBudgets()
   const { cards } = useCards()
   const { activePlans, totalMonthlyMSI } = useMSI()
 
@@ -29,6 +29,14 @@ export default function HomePage() {
   const balance = totalIncome - totalExpense
 
   const recentTx = transactions.slice(0, 5)
+
+  const handleDelete = async (tx: typeof transactions[0]) => {
+    const deleted = await deleteTransaction(tx.id)
+    if (deleted?.budget_id) {
+      const reverseAmount = deleted.type === 'expense' ? deleted.amount : -deleted.amount
+      await addMovement(deleted.budget_id, reverseAmount, `Eliminado: ${deleted.description || ''}`)
+    }
+  }
 
   const quickAccess = [
     { icon: '💳', name: 'Tarjetas', sub: `${cards.length} activa${cards.length !== 1 ? 's' : ''}`, href: '/cards', bg: '#EEF4FF' },
@@ -137,6 +145,7 @@ export default function HomePage() {
                   amount={tx.amount}
                   type={tx.type}
                   date={tx.date}
+                  onDelete={() => handleDelete(tx)}
                 />
               </div>
             )
