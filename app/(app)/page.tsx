@@ -10,22 +10,7 @@ import { useMSI } from '@/lib/hooks/useMSI'
 import { useCategories } from '@/lib/hooks/useCategories'
 import { formatMXN } from '@/lib/utils/currency'
 import { getGreeting, getMonthName } from '@/lib/utils/dates'
-
-const categoryMeta: Record<string, { icon: string; bg: string }> = {
-  groceries: { icon: '🛒', bg: '#FFF0F3' },
-  food: { icon: '🍕', bg: '#FFF3EE' },
-  transport: { icon: '⛽', bg: '#ECFEFF' },
-  health: { icon: '💊', bg: '#F3EEFF' },
-  entertainment: { icon: '🎮', bg: '#EEF4FF' },
-  home: { icon: '🏠', bg: '#E8F8EE' },
-  clothing: { icon: '👗', bg: '#FFF0F3' },
-  salary: { icon: '💼', bg: '#E8F8EE' },
-  freelance: { icon: '💻', bg: '#EEF4FF' },
-  investment: { icon: '📈', bg: '#F3EEFF' },
-  gift: { icon: '🎁', bg: '#FFF3EE' },
-  refund: { icon: '↩️', bg: '#ECFEFF' },
-}
-const defaultMeta = { icon: '💰', bg: '#F4F4F6' }
+import { resolveCategoryMeta } from '@/lib/utils/categories'
 
 export default function HomePage() {
   const { transactions } = useTransactions()
@@ -141,17 +126,7 @@ export default function HomePage() {
       ) : (
         <div className="bg-white border border-border rounded-card overflow-hidden">
           {recentTx.map((tx, i) => {
-            // Check hardcoded defaults first, then DB categories
-            let meta = categoryMeta[tx.category_id || '']
-            let categoryName = tx.category_id || ''
-            if (!meta && tx.category_id) {
-              const dbCat = dbCategories.find((c) => c.id === tx.category_id)
-              if (dbCat) {
-                meta = { icon: dbCat.icon || '📁', bg: dbCat.color || '#F4F4F6' }
-                categoryName = dbCat.name
-              }
-            }
-            if (!meta) meta = defaultMeta
+            const { meta, name: categoryName } = resolveCategoryMeta(tx.category_id, dbCategories)
             return (
               <div key={tx.id} className={i < recentTx.length - 1 ? 'border-b border-border' : ''}>
                 <TransactionItem
