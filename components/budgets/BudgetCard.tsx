@@ -29,16 +29,18 @@ export default function BudgetCard({
   gradientTo,
   onClick,
 }: BudgetCardProps) {
-  // accumulated = actual balance in the cajita (starts at budgetAmount, moves with transactions)
-  const isOverdrawn = accumulated < 0
-  const isGoalExceeded = type === 'income' && accumulated > budgetAmount
+  // Real balance = budget base + sum of all movements
+  // accumulated only tracks the delta (movements), budgetAmount is the starting point
+  const balance = budgetAmount + accumulated
+  const isOverdrawn = balance < 0
+  const isGoalExceeded = type === 'income' && balance > budgetAmount
 
-  // Progress: how full the cajita is relative to its budget
+  // Progress: how much of the budget remains
   const fillPercentage = budgetAmount > 0
-    ? Math.min(Math.round((Math.max(0, accumulated) / budgetAmount) * 100), 100)
+    ? Math.min(Math.round((Math.max(0, balance) / budgetAmount) * 100), 100)
     : 0
 
-  // Overdrawn card — balance went below zero, show the real number
+  // Overdrawn card — balance went below zero
   if (isOverdrawn) {
     return (
       <div
@@ -60,7 +62,7 @@ export default function BudgetCard({
           </div>
         </div>
         <div className="font-display text-[26px] font-black text-white tracking-[-1px] mb-3.5">
-          −{formatMXN(Math.abs(accumulated))}
+          −{formatMXN(Math.abs(balance))}
         </div>
         <div className="h-1.5 rounded-full bg-white/25 overflow-hidden">
           <div className="h-1.5 rounded-full bg-accent-red" style={{ width: '100%' }} />
@@ -68,7 +70,7 @@ export default function BudgetCard({
         <div className="flex justify-between mt-2.5">
           <span className="text-[11px] text-white/55">Presupuesto: {formatMXN(budgetAmount)}</span>
           <span className="font-display text-[11px] font-bold text-white/85">
-            Sobregiro: {formatMXN(Math.abs(accumulated))}
+            Sobregiro: {formatMXN(Math.abs(balance))}
           </span>
         </div>
         {committed > 0 && (
@@ -82,7 +84,7 @@ export default function BudgetCard({
 
   // Income goal exceeded (green celebration)
   if (isGoalExceeded) {
-    const extra = accumulated - budgetAmount
+    const extra = balance - budgetAmount
     return (
       <div
         onClick={onClick}
@@ -95,15 +97,15 @@ export default function BudgetCard({
             </div>
             <div>
               <div className="font-display text-[13px] font-bold text-ink-2">{name}</div>
-              <div className="text-[11px] text-accent-green font-semibold mt-0.5">🎉 Meta superada</div>
+              <div className="text-[11px] text-accent-green font-semibold mt-0.5">Meta superada</div>
             </div>
           </div>
           <div className="bg-accent-green-bg text-accent-green font-display text-[11px] font-bold px-2.5 py-1 rounded-pill">
-            {Math.round((accumulated / budgetAmount) * 100)}%
+            {Math.round((balance / budgetAmount) * 100)}%
           </div>
         </div>
         <div className="font-display text-[26px] font-black text-accent-green tracking-[-1px] mb-3.5">
-          {formatMXN(accumulated)}
+          {formatMXN(balance)}
         </div>
         <div className="h-1.5 rounded-full bg-[#B6F0D8] overflow-hidden">
           <div className="h-1.5 rounded-full bg-accent-green" style={{ width: '100%' }} />
@@ -118,8 +120,8 @@ export default function BudgetCard({
     )
   }
 
-  // Normal card — show balance in the cajita
-  const available = accumulated - committed
+  // Normal card — show real balance (budgetAmount + accumulated)
+  const available = balance - committed
 
   return (
     <div
@@ -141,7 +143,7 @@ export default function BudgetCard({
 
       <div className="font-display text-[13px] font-bold text-white/75 mb-0.5">{name}</div>
       <div className="font-display text-[26px] font-black text-white tracking-[-1px] mb-3.5">
-        {formatMXN(accumulated)}
+        {formatMXN(balance)}
       </div>
 
       <div className="h-1.5 rounded-full bg-white/25 overflow-hidden relative">

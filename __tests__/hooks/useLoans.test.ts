@@ -62,7 +62,7 @@ describe('useLoans', () => {
 
   it('should delete a loan', async () => {
     const loans = [
-      { id: 'l1', direction: 'given', contact_id: null, contact_name: 'Carlos', principal: 5000, monthly_payment: 1000, total_months: 5, paid_months: 2, start_date: '2026-01-01', is_completed: false, notes: null, created_at: '2026-01-01', contact: null },
+      { id: 'l1', direction: 'given', contact_id: null, contact_name: 'Carlos', principal: 5000, monthly_payment: 1000, total_months: 5, paid_months: 2, start_date: '2026-01-01', is_completed: false, notes: null, budget_id: null, created_at: '2026-01-01', contact: null },
     ]
     mockSupabaseQuery(loans)
 
@@ -72,7 +72,13 @@ describe('useLoans', () => {
     mockFrom.mockImplementation(() => {
       const chain: Record<string, unknown> = {}
       chain.delete = vi.fn().mockReturnValue(chain)
-      chain.eq = vi.fn().mockResolvedValue({ error: null })
+      chain.select = vi.fn().mockReturnValue(chain)
+      chain.eq = vi.fn().mockReturnValue(chain)
+      chain.not = vi.fn().mockResolvedValue({ data: [] })
+      // For the final delete call, eq should resolve
+      chain.delete = vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      })
       return chain
     })
 
