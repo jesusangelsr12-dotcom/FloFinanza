@@ -7,6 +7,7 @@ import { useTransactions } from '@/lib/hooks/useTransactions'
 import { useBudgets } from '@/lib/hooks/useBudgets'
 import { useCards } from '@/lib/hooks/useCards'
 import { useMSI } from '@/lib/hooks/useMSI'
+import { useCategories } from '@/lib/hooks/useCategories'
 import { formatMXN } from '@/lib/utils/currency'
 import { getGreeting, getMonthName } from '@/lib/utils/dates'
 
@@ -28,6 +29,7 @@ const defaultMeta = { icon: '💰', bg: '#F4F4F6' }
 
 export default function HomePage() {
   const { transactions } = useTransactions()
+  const { categories: dbCategories } = useCategories()
   const { budgets } = useBudgets()
   const { cards } = useCards()
   const { activePlans, totalMonthlyMSI } = useMSI()
@@ -139,14 +141,24 @@ export default function HomePage() {
       ) : (
         <div className="bg-white border border-border rounded-card overflow-hidden">
           {recentTx.map((tx, i) => {
-            const meta = categoryMeta[tx.category_id || ''] || defaultMeta
+            // Check hardcoded defaults first, then DB categories
+            let meta = categoryMeta[tx.category_id || '']
+            let categoryName = tx.category_id || ''
+            if (!meta && tx.category_id) {
+              const dbCat = dbCategories.find((c) => c.id === tx.category_id)
+              if (dbCat) {
+                meta = { icon: dbCat.icon || '📁', bg: dbCat.color || '#F4F4F6' }
+                categoryName = dbCat.name
+              }
+            }
+            if (!meta) meta = defaultMeta
             return (
               <div key={tx.id} className={i < recentTx.length - 1 ? 'border-b border-border' : ''}>
                 <TransactionItem
                   icon={meta.icon}
                   iconBg={meta.bg}
                   name={tx.description || (tx.type === 'income' ? 'Ingreso' : 'Gasto')}
-                  meta={tx.category_id || ''}
+                  meta={categoryName}
                   amount={tx.amount}
                   type={tx.type}
                   date={tx.date}

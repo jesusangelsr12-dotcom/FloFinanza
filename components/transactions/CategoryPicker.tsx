@@ -1,13 +1,15 @@
 'use client'
 
-interface Category {
+import { useCategories } from '@/lib/hooks/useCategories'
+
+interface CategoryItem {
   id: string
   icon: string
   name: string
   color: string
 }
 
-const expenseCategories: Category[] = [
+const defaultExpenseCategories: CategoryItem[] = [
   { id: 'groceries', icon: '🛒', name: 'Despensa', color: 'var(--amber)' },
   { id: 'food', icon: '🍕', name: 'Comida', color: 'var(--red)' },
   { id: 'transport', icon: '⛽', name: 'Transporte', color: 'var(--blue)' },
@@ -15,16 +17,14 @@ const expenseCategories: Category[] = [
   { id: 'entertainment', icon: '🎮', name: 'Ocio', color: 'var(--teal)' },
   { id: 'home', icon: '🏠', name: 'Hogar', color: 'var(--green)' },
   { id: 'clothing', icon: '👗', name: 'Ropa', color: 'var(--rose)' },
-  { id: 'more', icon: '⋯', name: 'Más', color: 'var(--ink3)' },
 ]
 
-const incomeCategories: Category[] = [
+const defaultIncomeCategories: CategoryItem[] = [
   { id: 'salary', icon: '💼', name: 'Salario', color: 'var(--green)' },
   { id: 'freelance', icon: '💻', name: 'Freelance', color: 'var(--blue)' },
   { id: 'investment', icon: '📈', name: 'Inversión', color: 'var(--purple)' },
   { id: 'gift', icon: '🎁', name: 'Regalo', color: 'var(--amber)' },
   { id: 'refund', icon: '↩️', name: 'Reembolso', color: 'var(--teal)' },
-  { id: 'other-income', icon: '⋯', name: 'Otro', color: 'var(--ink3)' },
 ]
 
 interface CategoryPickerProps {
@@ -34,7 +34,21 @@ interface CategoryPickerProps {
 }
 
 export default function CategoryPicker({ type, selectedId, onSelect }: CategoryPickerProps) {
-  const categories = type === 'expense' ? expenseCategories : incomeCategories
+  const { categories: dbCategories } = useCategories()
+
+  // DB categories for this type, mapped to picker format
+  const userCategories: CategoryItem[] = dbCategories
+    .filter((c) => c.type === type)
+    .map((c) => ({
+      id: c.id,
+      icon: c.icon || '📁',
+      name: c.name,
+      color: c.color || 'var(--ink3)',
+    }))
+
+  // If user has DB categories for this type, show those; otherwise show defaults
+  const defaults = type === 'expense' ? defaultExpenseCategories : defaultIncomeCategories
+  const categories = userCategories.length > 0 ? userCategories : defaults
 
   return (
     <div className="grid grid-cols-4 gap-2">
