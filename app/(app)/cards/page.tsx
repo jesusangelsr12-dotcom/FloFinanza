@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CreditCard, Plus, Trash2, Calendar, Scissors } from 'lucide-react'
+import { CreditCard, Plus, Trash2, Calendar, Scissors, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useCards, type CreditCard as CardType } from '@/lib/hooks/useCards'
 import { formatMXN } from '@/lib/utils/currency'
@@ -114,8 +114,9 @@ export default function CardsPage() {
             return (
               <div key={card.id}>
                 {/* Visual credit card */}
-                <div
-                  className="rounded-[20px] p-5 pb-4 relative overflow-hidden mb-2"
+                <Link
+                  href={`/cards/${card.id}`}
+                  className="block rounded-[20px] p-5 pb-4 relative overflow-hidden mb-2"
                   style={{ background: card.color || '#3B82F6' }}
                 >
                   <div className="absolute -top-[40px] -right-[20px] w-[160px] h-[160px] rounded-full bg-white/10 pointer-events-none" />
@@ -143,7 +144,7 @@ export default function CardsPage() {
                       </div>
                     )}
                   </div>
-                </div>
+                </Link>
 
                 {/* Card details */}
                 <Card variant="sm">
@@ -188,15 +189,20 @@ export default function CardsPage() {
 
                   {/* Actions */}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-                    <Link href="/msi" className="font-display text-xs font-bold text-accent-purple">
-                      Ver MSI
+                    <Link href={`/cards/${card.id}`} className="font-display text-xs font-bold text-accent-blue flex items-center gap-0.5">
+                      Ver movimientos <ChevronRight size={12} />
                     </Link>
-                    <button
-                      onClick={() => deleteCard(card.id)}
-                      className="text-xs text-ink-3 flex items-center gap-1"
-                    >
-                      <Trash2 size={12} /> Eliminar
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <Link href="/msi" className="font-display text-xs font-bold text-accent-purple">
+                        MSI
+                      </Link>
+                      <button
+                        onClick={() => deleteCard(card.id)}
+                        className="text-xs text-ink-3 flex items-center gap-1"
+                      >
+                        <Trash2 size={12} /> Eliminar
+                      </button>
+                    </div>
                   </div>
                 </Card>
               </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getBillingPeriod } from '@/lib/utils/billing'
 
 export interface CreditCard {
   id: string
@@ -88,17 +89,17 @@ export function useCards() {
 
   const getCardSpending = async (cardId: string) => {
     const supabase = createClient()
-    const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+    const card = cards.find((c) => c.id === cardId)
+    const cutDay = card?.cut_day ?? 1
+    const period = getBillingPeriod(cutDay)
 
     const { data } = await supabase
       .from('transactions')
       .select('amount')
       .eq('card_id', cardId)
       .eq('type', 'expense')
-      .gte('date', startOfMonth)
-      .lte('date', endOfMonth)
+      .gte('date', period.start)
+      .lte('date', period.end)
 
     return data?.reduce((sum, t) => sum + t.amount, 0) || 0
   }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronDown } from 'lucide-react'
+import { X, ChevronDown, CalendarDays } from 'lucide-react'
 import CategoryPicker from './CategoryPicker'
 import { useTransactions } from '@/lib/hooks/useTransactions'
 import { useBudgets } from '@/lib/hooks/useBudgets'
@@ -21,6 +21,7 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
   const [selectedCardId, setSelectedCardId] = useState<string>('')
   const [selectedMethod, setSelectedMethod] = useState('cash')
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0])
   const [isShared, setIsShared] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,6 +49,7 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
     setSelectedCategory(null)
     setSelectedCardId('')
     setSelectedMethod('cash')
+    setSelectedDate(new Date().toISOString().split('T')[0])
     setSelectedBudgetId('')
     setIsShared(false)
   }
@@ -62,7 +64,7 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
         type,
         amount: amountNum,
         description: description || null,
-        date: new Date().toISOString().split('T')[0],
+        date: selectedDate,
         category_id: selectedCategory || null,
         budget_id: selectedBudgetId || null,
         card_id: selectedCardId || null,
@@ -171,6 +173,56 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
                   placeholder={type === 'expense' ? '¿En qué gastaste?' : '¿De dónde viene?'}
                   className="w-full p-3.5 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink outline-none focus:border-accent-blue focus:bg-white transition"
                 />
+              </div>
+
+              {/* Date picker */}
+              <div className="mb-3.5">
+                <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Fecha</label>
+                <div className="flex gap-2">
+                  {(() => {
+                    const today = new Date().toISOString().split('T')[0]
+                    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDate(today)}
+                          className={`px-3.5 py-2 rounded-pill font-display text-xs font-bold transition-all ${
+                            selectedDate === today
+                              ? 'bg-ink text-white'
+                              : 'bg-bg text-ink-3 border border-border-2'
+                          }`}
+                        >
+                          Hoy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDate(yesterday)}
+                          className={`px-3.5 py-2 rounded-pill font-display text-xs font-bold transition-all ${
+                            selectedDate === yesterday
+                              ? 'bg-ink text-white'
+                              : 'bg-bg text-ink-3 border border-border-2'
+                          }`}
+                        >
+                          Ayer
+                        </button>
+                        <div className="relative flex-1">
+                          <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3 pointer-events-none" />
+                          <input
+                            type="date"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className={`w-full py-2 pl-8 pr-2 rounded-pill font-display text-xs font-bold outline-none transition-all ${
+                              selectedDate !== today && selectedDate !== yesterday
+                                ? 'bg-ink text-white'
+                                : 'bg-bg text-ink-3 border border-border-2'
+                            }`}
+                          />
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
               </div>
 
               {/* Category */}
