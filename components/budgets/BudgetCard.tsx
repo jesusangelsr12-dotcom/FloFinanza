@@ -29,8 +29,7 @@ export default function BudgetCard({
   gradientTo,
   onClick,
 }: BudgetCardProps) {
-  // accumulated = actual balance in the cajita
-  // Negative means overdrawn (spent more than what's in it)
+  // accumulated = actual balance in the cajita (starts at budgetAmount, moves with transactions)
   const isOverdrawn = accumulated < 0
   const isGoalExceeded = type === 'income' && accumulated > budgetAmount
 
@@ -39,40 +38,42 @@ export default function BudgetCard({
     ? Math.min(Math.round((Math.max(0, accumulated) / budgetAmount) * 100), 100)
     : 0
 
-  // Overdrawn card (red alert) — only when balance goes negative
+  // Overdrawn card — balance went below zero, show the real number
   if (isOverdrawn) {
-    const deficit = Math.abs(accumulated)
     return (
       <div
         onClick={onClick}
-        className="rounded-[24px] p-5 mb-3 bg-accent-red-bg border-2 border-[#FFD6DE] cursor-pointer hover:-translate-y-0.5 transition-transform"
+        className="rounded-[24px] p-5 mb-3 relative overflow-hidden cursor-pointer hover:-translate-y-0.5 transition-transform"
+        style={{ background: `linear-gradient(135deg, ${gradientFrom}, ${gradientTo})` }}
       >
+        <div className="absolute -top-[30px] -right-[30px] w-[130px] h-[130px] rounded-full bg-white/[0.18] pointer-events-none" />
+
         <div className="flex items-start justify-between mb-3.5">
           <div className="flex items-center gap-2.5">
-            <div className="w-[46px] h-[46px] rounded-sm bg-accent-red-bg flex items-center justify-center text-[22px]">
+            <div className="w-[46px] h-[46px] rounded-sm bg-white/25 flex items-center justify-center text-[22px]">
               {icon}
             </div>
             <div>
-              <div className="font-display text-[13px] font-bold text-ink-2">{name}</div>
-              <div className="text-[11px] text-accent-red font-semibold mt-0.5">⚠️ Sin saldo</div>
+              <div className="font-display text-[13px] font-bold text-white/90">{name}</div>
+              <div className="text-[11px] text-white/70 font-semibold mt-0.5">Saldo negativo</div>
             </div>
           </div>
         </div>
-        <div className="font-display text-[26px] font-black text-accent-red tracking-[-1px] mb-3.5">
-          −{formatMXN(deficit)}
+        <div className="font-display text-[26px] font-black text-white tracking-[-1px] mb-3.5">
+          −{formatMXN(Math.abs(accumulated))}
         </div>
-        <div className="h-1.5 rounded-full bg-[#FFD6DE] overflow-hidden">
+        <div className="h-1.5 rounded-full bg-white/25 overflow-hidden">
           <div className="h-1.5 rounded-full bg-accent-red" style={{ width: '100%' }} />
         </div>
         <div className="flex justify-between mt-2.5">
-          <span className="text-[11px] text-ink-3">Presupuesto: {formatMXN(budgetAmount)}</span>
-          <span className="font-display text-[11px] font-bold text-accent-red">
-            Te pasaste {formatMXN(deficit)}
+          <span className="text-[11px] text-white/55">Presupuesto: {formatMXN(budgetAmount)}</span>
+          <span className="font-display text-[11px] font-bold text-white/85">
+            Sobregiro: {formatMXN(Math.abs(accumulated))}
           </span>
         </div>
         {committed > 0 && (
-          <div className="mt-2 pt-2 border-t border-[#FFD6DE]">
-            <span className="text-[11px] text-ink-3">Comprometido: {formatMXN(committed)}</span>
+          <div className="mt-2 pt-2 border-t border-white/20">
+            <span className="text-[11px] text-white/55">Comprometido: {formatMXN(committed)}</span>
           </div>
         )}
       </div>
