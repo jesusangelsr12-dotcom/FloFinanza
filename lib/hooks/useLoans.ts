@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { insertTransaction } from '@/lib/utils/transactions'
 
 export interface Loan {
   id: string
@@ -96,6 +97,17 @@ export function useLoans() {
 
       const { error: payError } = await supabase.from('loan_payments').insert(payments)
       if (payError) console.error('Error inserting loan payments:', payError)
+
+      // Create transaction: lending = expense, borrowing = income
+      await insertTransaction({
+        type: loan.direction === 'given' ? 'expense' : 'income',
+        amount: loan.principal,
+        description: loan.direction === 'given'
+          ? `Préstamo a ${loan.contact_name}`
+          : `Préstamo de ${loan.contact_name}`,
+        date: loan.start_date,
+      })
+
       setLoans((prev) => [data as Loan, ...prev])
     }
     return data
@@ -122,6 +134,19 @@ export function useLoans() {
         .from('loans')
         .update({ paid_months: newPaidMonths, is_completed: isCompleted })
         .eq('id', loanId)
+
+      // Create transaction: receiving payment = income, making payment = expense
+      const contactName = loan.contact?.name || loan.contact_name || ''
+      const today = new Date().toISOString().split('T')[0]
+      await insertTransaction({
+        type: loan.direction === 'given' ? 'income' : 'expense',
+        amount: loan.monthly_payment,
+        description: loan.direction === 'given'
+          ? `Pago préstamo de ${contactName} (${newPaidMonths}/${loan.total_months})`
+          : `Pago préstamo a ${contactName} (${newPaidMonths}/${loan.total_months})`,
+        date: today,
+        budget_id: budgetId || null,
+      })
 
       setLoans((prev) =>
         prev.map((l) =>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { insertTransaction } from '@/lib/utils/transactions'
 
 export interface Split {
   id: string
@@ -70,6 +71,19 @@ export function useSplits() {
       .eq('id', splitId)
 
     if (!error) {
+      const split = splits.find((s) => s.id === splitId)
+      if (split) {
+        // Create income transaction: someone paid you back
+        const contactName = split.contact?.name || 'Contacto'
+        const today = new Date().toISOString().split('T')[0]
+        await insertTransaction({
+          type: 'income',
+          amount: split.amount,
+          description: `${contactName} te pagó (gasto compartido)`,
+          date: today,
+        })
+      }
+
       setSplits((prev) =>
         prev.map((s) =>
           s.id === splitId ? { ...s, is_paid: true, paid_at: new Date().toISOString() } : s
