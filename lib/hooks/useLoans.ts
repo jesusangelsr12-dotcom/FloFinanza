@@ -58,6 +58,7 @@ export function useLoans() {
     total_months: number
     start_date: string
     notes?: string
+    budget_name?: string
   }) => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -99,12 +100,14 @@ export function useLoans() {
       if (payError) console.error('Error inserting loan payments:', payError)
 
       // Create transaction: lending = expense, borrowing = income
+      const monthsLabel = `${loan.total_months} mes${loan.total_months !== 1 ? 'es' : ''}`
+      const budgetLabel = loan.budget_name ? ` · Cajita: ${loan.budget_name}` : ''
       await insertTransaction({
         type: loan.direction === 'given' ? 'expense' : 'income',
         amount: loan.principal,
         description: loan.direction === 'given'
-          ? `Préstamo a ${loan.contact_name}`
-          : `Préstamo de ${loan.contact_name}`,
+          ? `Préstamo a ${loan.contact_name} a ${monthsLabel}${budgetLabel}`
+          : `Préstamo de ${loan.contact_name} a ${monthsLabel}${budgetLabel}`,
         date: loan.start_date,
       })
 
@@ -113,7 +116,7 @@ export function useLoans() {
     return data
   }
 
-  const markPayment = async (loanId: string, monthNumber: number, budgetId?: string) => {
+  const markPayment = async (loanId: string, monthNumber: number, budgetId?: string, budgetName?: string) => {
     const supabase = createClient()
     await supabase
       .from('loan_payments')
@@ -138,12 +141,13 @@ export function useLoans() {
       // Create transaction: receiving payment = income, making payment = expense
       const contactName = loan.contact?.name || loan.contact_name || ''
       const today = new Date().toISOString().split('T')[0]
+      const budgetLabel = budgetName ? ` → ${budgetName}` : ''
       await insertTransaction({
         type: loan.direction === 'given' ? 'income' : 'expense',
         amount: loan.monthly_payment,
         description: loan.direction === 'given'
-          ? `Pago préstamo de ${contactName} (${newPaidMonths}/${loan.total_months})`
-          : `Pago préstamo a ${contactName} (${newPaidMonths}/${loan.total_months})`,
+          ? `${contactName} te pagó préstamo (${newPaidMonths}/${loan.total_months})${budgetLabel}`
+          : `Pagaste préstamo a ${contactName} (${newPaidMonths}/${loan.total_months})${budgetLabel}`,
         date: today,
         budget_id: budgetId || null,
       })

@@ -75,11 +75,12 @@ export function useSplits() {
       if (split) {
         // Create income transaction: someone paid you back
         const contactName = split.contact?.name || 'Contacto'
+        const expenseDesc = split.transaction?.description || 'gasto compartido'
         const today = new Date().toISOString().split('T')[0]
         await insertTransaction({
           type: 'income',
           amount: split.amount,
-          description: `${contactName} te pagó (gasto compartido)`,
+          description: `${contactName} te pagó · ${expenseDesc}`,
           date: today,
         })
       }

@@ -113,10 +113,13 @@ export function useMSI() {
 
       // Create expense transaction for the MSI payment
       const today = new Date().toISOString().split('T')[0]
+      const cardLabel = plan.card
+        ? ` · ${plan.card.name}${plan.card.last_four ? ` ••${plan.card.last_four}` : ''}`
+        : ''
       await insertTransaction({
         type: 'expense',
         amount: plan.monthly_amount,
-        description: `MSI: ${plan.description} (${newPaidMonths}/${plan.total_months})`,
+        description: `MSI: ${plan.description} (${newPaidMonths}/${plan.total_months})${cardLabel}`,
         date: today,
         card_id: plan.card_id,
       })

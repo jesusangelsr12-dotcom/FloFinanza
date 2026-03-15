@@ -50,6 +50,7 @@ export default function LoansPage() {
 
   const handleAddLoan = async () => {
     if (!contactName.trim() || !principal || !totalMonths) return
+    const budgetForLoan = budgets.find((b) => b.id === selectedBudgetForLoan)
     await addLoan({
       direction,
       contact_id: selectedContact || undefined,
@@ -59,6 +60,7 @@ export default function LoansPage() {
       total_months: Number(totalMonths),
       start_date: startDate,
       notes: notes.trim() || undefined,
+      budget_name: budgetForLoan ? `${budgetForLoan.icon || '📦'} ${budgetForLoan.name}` : undefined,
     })
 
     // Deduct/add amount from/to selected cajita
@@ -103,7 +105,9 @@ export default function LoansPage() {
     if (!payingPayment) return
     const { loanId, monthNumber, amount, contactName } = payingPayment
 
-    await markPayment(loanId, monthNumber, selectedBudgetForPayment || undefined)
+    const budgetForPayment = budgets.find((b) => b.id === selectedBudgetForPayment)
+    const budgetNameForPayment = budgetForPayment ? `${budgetForPayment.icon || '📦'} ${budgetForPayment.name}` : undefined
+    await markPayment(loanId, monthNumber, selectedBudgetForPayment || undefined, budgetNameForPayment)
 
     // Add money to the selected cajita
     if (selectedBudgetForPayment) {
