@@ -14,7 +14,7 @@ describe('useBudgets', () => {
 
   it('should load active budgets', async () => {
     const budgets = [
-      { id: 'b1', name: 'Comida', icon: '🍕', color: null, gradient_from: null, gradient_to: null, amount: 3000, accumulated: 1200, period_days: 14, is_active: true },
+      { id: 'b1', name: 'Comida', icon: '🍕', color: null, gradient_from: null, gradient_to: null, amount: 3000, accumulated: 1200, committed: 0, type: 'expense' as const, period_days: 14, is_active: true },
       { id: 'b2', name: 'Transporte', icon: '🚗', color: null, gradient_from: null, gradient_to: null, amount: 1000, accumulated: 500, period_days: 14, is_active: true },
     ]
     mockSupabaseQuery(budgets)
@@ -52,7 +52,7 @@ describe('useBudgets', () => {
     await act(async () => {
       await result.current.addBudget({
         name: 'Ocio', icon: '🎮', color: null,
-        gradient_from: null, gradient_to: null, amount: 2000, period_days: 14,
+        gradient_from: null, gradient_to: null, amount: 2000, type: 'expense' as const, period_days: 14,
       })
     })
 
@@ -65,7 +65,7 @@ describe('useBudgets', () => {
 
   it('should soft-delete a budget (set is_active=false)', async () => {
     const budgets = [
-      { id: 'b1', name: 'Comida', icon: '🍕', color: null, gradient_from: null, gradient_to: null, amount: 3000, accumulated: 1200, period_days: 14, is_active: true },
+      { id: 'b1', name: 'Comida', icon: '🍕', color: null, gradient_from: null, gradient_to: null, amount: 3000, accumulated: 1200, committed: 0, type: 'expense' as const, period_days: 14, is_active: true },
     ]
     mockSupabaseQuery(budgets)
 
@@ -90,7 +90,7 @@ describe('useBudgets', () => {
 
   it('should add movement and update accumulated', async () => {
     const budgets = [
-      { id: 'b1', name: 'Comida', icon: '🍕', color: null, gradient_from: null, gradient_to: null, amount: 3000, accumulated: 1000, period_days: 14, is_active: true },
+      { id: 'b1', name: 'Comida', icon: '🍕', color: null, gradient_from: null, gradient_to: null, amount: 3000, accumulated: 1000, committed: 0, type: 'expense' as const, period_days: 14, is_active: true },
     ]
     mockSupabaseQuery(budgets)
 
@@ -127,7 +127,7 @@ describe('useBudgets', () => {
     await act(async () => {
       await result.current.addBudget({
         name: 'Test', icon: '🧪', color: null,
-        gradient_from: null, gradient_to: null, amount: 100, period_days: 7,
+        gradient_from: null, gradient_to: null, amount: 100, type: 'expense' as const, period_days: 7,
       })
     })
 
