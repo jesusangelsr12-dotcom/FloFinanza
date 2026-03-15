@@ -26,7 +26,7 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
   const [error, setError] = useState<string | null>(null)
 
   const { addTransaction } = useTransactions()
-  const { budgets } = useBudgets()
+  const { budgets, addMovement } = useBudgets()
   const { cards } = useCards()
 
   const amountNum = Number(amount) || 0
@@ -67,6 +67,12 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
         budget_id: selectedBudgetId || null,
         card_id: selectedCardId || null,
       })
+
+      // Update the budget's accumulated amount if a cajita was selected
+      if (selectedBudgetId) {
+        const movementAmount = type === 'expense' ? -amountNum : amountNum
+        await addMovement(selectedBudgetId, movementAmount, description || undefined)
+      }
 
       resetForm()
       onClose()
