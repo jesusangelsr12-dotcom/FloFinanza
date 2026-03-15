@@ -117,16 +117,21 @@ export function useBudgets() {
     setBudgets((prev) => prev.filter((b) => b.id !== id))
   }
 
-  const resetBudget = async (id: string) => {
+  const resetBudget = async (id: string): Promise<{ ok: boolean; error?: string }> => {
     const supabase = createClient()
-    await supabase
+    const { error } = await supabase
       .from('budgets')
       .update({ accumulated: 0, updated_at: new Date().toISOString() })
       .eq('id', id)
 
+    if (error) {
+      return { ok: false, error: error.message }
+    }
+
     setBudgets((prev) =>
       prev.map((b) => b.id === id ? { ...b, accumulated: 0, committed: 0 } : b)
     )
+    return { ok: true }
   }
 
   const distributeSalary = async (salaryAmount: number) => {
