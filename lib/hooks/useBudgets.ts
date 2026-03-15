@@ -111,9 +111,72 @@ export function useBudgets() {
     setBudgets((prev) => prev.filter((b) => b.id !== id))
   }
 
+  const resetBudget = async (id: string) => {
+    const supabase = createClient()
+    await supabase
+      .from('budgets')
+      .update({ accumulated: 0, committed: 0, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    setBudgets((prev) =>
+      prev.map((b) => b.id === id ? { ...b, accumulated: 0, committed: 0 } : b)
+    )
+  }
+
+  const distributeSalary = async (salaryAmount: number) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || budgets.length === 0) return
+
+    const totalBudgeted = budgets.reduce((sum, b) => sum + b.amount, 0)
+    const today = new Date().toISOString().split('T')[0]
+
+    const movements: { budget_id: string; user_id: string; amount: number; note: string }[] = []
+    const updates: { id: string; newAccumulated: number }[] = []
+
+    for (const budget of budgets) {
+      // Each cajita gets its proportional share of the salary
+      const share = totalBudgeted > 0
+        ? Math.round((budget.amount / totalBudgeted) * salaryAmount * 100) / 100
+        : Math.round((salaryAmount / budgets.length) * 100) / 100
+
+      movements.push({
+        budget_id: budget.id,
+        user_id: user.id,
+        amount: share,
+        note: `Salario ${today}`,
+      })
+      updates.push({ id: budget.id, newAccumulated: budget.accumulated + share })
+    }
+
+    // Insert all movements in batch
+    await supabase.from('budget_movements').insert(movements)
+
+    // Update each budget's accumulated
+    for (const u of updates) {
+      await supabase
+        .from('budgets')
+        .update({ accumulated: u.newAccumulated, updated_at: new Date().toISOString() })
+        .eq('id', u.id)
+    }
+
+    // Update local state
+    setBudgets((prev) =>
+      prev.map((b) => {
+        const update = updates.find((u) => u.id === b.id)
+        return update ? { ...b, accumulated: update.newAccumulated } : b
+      })
+    )
+
+    return { totalDistributed: salaryAmount, budgetCount: budgets.length }
+  }
+
   useEffect(() => {
     fetchBudgets()
   }, [])
 
-  return { budgets, loading, addBudget, addMovement, addCommitment, deleteBudget, refresh: fetchBudgets }
+  return {
+    budgets, loading, addBudget, addMovement, addCommitment,
+    deleteBudget, resetBudget, distributeSalary, refresh: fetchBudgets,
+  }
 }

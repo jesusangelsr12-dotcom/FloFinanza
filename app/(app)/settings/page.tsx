@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, DollarSign, Tag, Package, CreditCard, Plus, Trash2, X, Calendar, HelpCircle, ChevronRight } from 'lucide-react'
+import { ArrowLeft, DollarSign, Tag, Package, CreditCard, Plus, Trash2, X, Calendar, HelpCircle, ChevronRight, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useSalary } from '@/lib/hooks/useSalary'
 import { useCategories } from '@/lib/hooks/useCategories'
@@ -21,7 +21,7 @@ const CATEGORY_ICONS = ['🏠', '🍕', '🚗', '💊', '🎮', '👗', '📱', 
 export default function SettingsPage() {
   const { settings, loading: salaryLoading, updateSalary } = useSalary()
   const { categories, groups, loading: catsLoading, addCategory, addGroup, deleteCategory, deleteGroup } = useCategories()
-  const { budgets, loading: budgetsLoading, deleteBudget } = useBudgets()
+  const { budgets, loading: budgetsLoading, deleteBudget, resetBudget } = useBudgets()
   const { cards, loading: cardsLoading, deleteCard } = useCards()
 
   const [salary, setSalary] = useState('')
@@ -434,12 +434,21 @@ export default function SettingsPage() {
                     <div className="text-[11px] text-ink-3">${b.amount.toLocaleString('es-MX')} / periodo</div>
                   </div>
                 </div>
-                <button
-                  onClick={() => setConfirmDelete({ type: 'budget', id: b.id, name: b.name })}
-                  className="p-1.5 text-ink-3 hover:text-accent-red transition"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => resetBudget(b.id)}
+                    className="p-1.5 text-ink-3 hover:text-accent-blue transition"
+                    title="Reiniciar saldo"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete({ type: 'budget', id: b.id, name: b.name })}
+                    className="p-1.5 text-ink-3 hover:text-accent-red transition"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

@@ -18,14 +18,16 @@ const GRADIENT_PRESETS = [
 ]
 
 export default function BudgetsPage() {
-  const { budgets, loading, addBudget } = useBudgets()
-  const { settings } = useSalary()
+  const { budgets, loading, addBudget, distributeSalary } = useBudgets()
+  const { settings, updateSalary } = useSalary()
   const [showNewModal, setShowNewModal] = useState(false)
   const [newName, setNewName] = useState('')
   const [newAmount, setNewAmount] = useState('')
   const [newIcon, setNewIcon] = useState('📦')
   const [newType, setNewType] = useState<'expense' | 'income'>('expense')
   const [selectedGradient, setSelectedGradient] = useState(0)
+  const [distributing, setDistributing] = useState(false)
+  const [distributed, setDistributed] = useState(false)
 
   const totalAccumulated = budgets.reduce((sum, b) => sum + Math.max(0, b.amount + b.accumulated), 0)
 
@@ -35,9 +37,33 @@ export default function BudgetsPage() {
 
   const nextDateStr = settings?.salary_next_date
   const daysLeft = nextDateStr ? daysUntil(nextDateStr) : null
+  const salaryReady = daysLeft !== null && daysLeft <= 0 && !!settings?.salary
   const rechargeText = daysLeft !== null && daysLeft >= 0
     ? `${freqLabel} · proxima recarga en ${daysLeft} dia${daysLeft !== 1 ? 's' : ''}`
     : freqLabel
+
+  const handleDistributeSalary = async () => {
+    if (!settings?.salary) return
+    setDistributing(true)
+    await distributeSalary(settings.salary)
+
+    // Advance salary_next_date to next period
+    if (settings.salary_next_date) {
+      const next = new Date(settings.salary_next_date)
+      const freq = settings.salary_frequency
+      if (freq === 'weekly') next.setDate(next.getDate() + 7)
+      else if (freq === 'biweekly') next.setDate(next.getDate() + 14)
+      else if (freq === 'monthly') next.setMonth(next.getMonth() + 1)
+      else if (freq === 'custom' && settings.salary_custom_days) next.setDate(next.getDate() + settings.salary_custom_days)
+      else next.setDate(next.getDate() + 14) // fallback
+
+      await updateSalary({ salary_next_date: next.toISOString().split('T')[0] })
+    }
+
+    setDistributing(false)
+    setDistributed(true)
+    setTimeout(() => setDistributed(false), 3000)
+  }
 
   const icons = ['📦', '✈️', '🏠', '🍔', '💊', '🎮', '👗', '📱', '🚗', '💳', '🎓', '💰']
 
@@ -80,6 +106,42 @@ export default function BudgetsPage() {
         </div>
         <div className="text-xs text-ink-3 mt-1.5">{rechargeText}</div>
       </div>
+
+      {/* Salary distribution banner */}
+      {salaryReady && !distributed && budgets.length > 0 && (
+        <div className="bg-accent-green-bg border border-[#B6F0D8] rounded-[20px] p-4 mt-4">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-accent-green/10 flex items-center justify-center text-xl flex-shrink-0">
+              💰
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-display text-[13px] font-bold text-ink">Tu salario llegó</div>
+              <div className="text-[11px] text-ink-3 mt-0.5">
+                {formatMXN(settings?.salary || 0)} · Distribuir a {budgets.length} cajita{budgets.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+            <button
+              onClick={handleDistributeSalary}
+              disabled={distributing}
+              className="px-4 py-2.5 rounded-pill bg-accent-green text-white font-display text-xs font-bold flex-shrink-0"
+            >
+              {distributing ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </span>
+              ) : 'Distribuir'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {distributed && (
+        <div className="bg-accent-green-bg border border-[#B6F0D8] rounded-[20px] p-4 mt-4 text-center">
+          <div className="font-display text-sm font-bold text-accent-green">
+            Salario distribuido a tus cajitas
+          </div>
+        </div>
+      )}
 
       {/* Section header */}
       <div className="flex items-center justify-between my-5">
