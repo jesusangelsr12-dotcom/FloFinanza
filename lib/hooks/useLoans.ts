@@ -112,6 +112,7 @@ export function useLoans() {
           ? `Préstamo a ${loan.contact_name} a ${monthsLabel}${budgetLabel}`
           : `Préstamo de ${loan.contact_name} a ${monthsLabel}${budgetLabel}`,
         date: loan.start_date,
+        budget_id: loan.budget_id || null,
       })
 
       setLoans((prev) => [data as Loan, ...prev])
