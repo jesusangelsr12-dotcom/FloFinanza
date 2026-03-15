@@ -40,6 +40,7 @@ export default function LoansPage() {
   const [totalMonths, setTotalMonths] = useState('')
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
   const [notes, setNotes] = useState('')
+  const [selectedBudgetForLoan, setSelectedBudgetForLoan] = useState('')
 
   const displayLoans = activeTab === 'given' ? givenLoans : receivedLoans
 
@@ -59,11 +60,25 @@ export default function LoansPage() {
       start_date: startDate,
       notes: notes.trim() || undefined,
     })
+
+    // Deduct/add amount from/to selected cajita
+    if (selectedBudgetForLoan) {
+      const amount = Number(principal)
+      if (direction === 'given') {
+        // I lent money → subtract from my cajita
+        await addMovement(selectedBudgetForLoan, -amount, `Préstamo a ${contactName.trim()}`)
+      } else {
+        // I received a loan → add to my cajita
+        await addMovement(selectedBudgetForLoan, amount, `Préstamo de ${contactName.trim()}`)
+      }
+    }
+
     setContactName('')
     setSelectedContact('')
     setPrincipal('')
     setTotalMonths('')
     setNotes('')
+    setSelectedBudgetForLoan('')
     setShowAddModal(false)
   }
 
@@ -234,9 +249,15 @@ export default function LoansPage() {
                   {isExpanded ? 'Ocultar pagos' : 'Ver pagos'}
                 </button>
 
-                {isExpanded && payments[loan.id] && (
+                {isExpanded && (
                   <div className="mt-3 space-y-1.5">
-                    {payments[loan.id].map((p) => {
+                    {!payments[loan.id] ? (
+                      <div className="flex items-center justify-center py-3">
+                        <div className="w-4 h-4 border-2 border-ink/20 border-t-ink rounded-full animate-spin" />
+                      </div>
+                    ) : payments[loan.id].length === 0 ? (
+                      <p className="text-xs text-ink-3 py-2 text-center">No se encontraron pagos</p>
+                    ) : payments[loan.id].map((p) => {
                       const isPaying = payingPayment?.loanId === loan.id && payingPayment?.monthNumber === p.month_number
                       return (
                         <div key={p.id} className="border-t border-border">
@@ -428,6 +449,25 @@ export default function LoansPage() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
+
+          {/* Cajita selector */}
+          {budgets.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <label className="font-display text-xs font-bold text-ink-2">
+                {direction === 'given' ? '¿De qué cajita sale?' : '¿A qué cajita va?'}
+              </label>
+              <select
+                value={selectedBudgetForLoan}
+                onChange={(e) => setSelectedBudgetForLoan(e.target.value)}
+                className="w-full p-3.5 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink outline-none focus:border-accent-blue focus:bg-white transition"
+              >
+                <option value="">Sin cajita</option>
+                {budgets.map((b) => (
+                  <option key={b.id} value={b.id}>{b.icon || '📦'} {b.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <Button
             onClick={handleAddLoan}

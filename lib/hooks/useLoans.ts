@@ -94,7 +94,8 @@ export function useLoans() {
         })
       }
 
-      await supabase.from('loan_payments').insert(payments)
+      const { error: payError } = await supabase.from('loan_payments').insert(payments)
+      if (payError) console.error('Error inserting loan payments:', payError)
       setLoans((prev) => [data as Loan, ...prev])
     }
     return data
@@ -132,11 +133,22 @@ export function useLoans() {
 
   const getPayments = async (loanId: string): Promise<LoanPayment[]> => {
     const supabase = createClient()
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('loan_payments')
       .select('*, budget:budgets(id, name, icon)')
       .eq('loan_id', loanId)
       .order('month_number')
+
+    if (error) {
+      console.error('Error fetching payments with budget join:', error)
+      // Fallback: query without the budget join
+      const { data: fallback } = await supabase
+        .from('loan_payments')
+        .select('*')
+        .eq('loan_id', loanId)
+        .order('month_number')
+      return (fallback as LoanPayment[]) || []
+    }
 
     return (data as LoanPayment[]) || []
   }
