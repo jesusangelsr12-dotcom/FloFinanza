@@ -7,6 +7,7 @@ import { useTransactions } from '@/lib/hooks/useTransactions'
 import { useBudgets } from '@/lib/hooks/useBudgets'
 import { useCards } from '@/lib/hooks/useCards'
 import { useMSI } from '@/lib/hooks/useMSI'
+import { useLoans } from '@/lib/hooks/useLoans'
 import { useCategories } from '@/lib/hooks/useCategories'
 import { formatMXN } from '@/lib/utils/currency'
 import { getGreeting, getMonthName } from '@/lib/utils/dates'
@@ -18,6 +19,7 @@ export default function HomePage() {
   const { budgets, addMovement } = useBudgets()
   const { cards } = useCards()
   const { activePlans, totalMonthlyMSI } = useMSI()
+  const { totalGivenPending, totalReceivedPending, givenLoans, receivedLoans } = useLoans()
 
   const now = new Date()
   const monthLabel = getMonthName(now)
@@ -41,6 +43,7 @@ export default function HomePage() {
   const quickAccess = [
     { icon: '💳', name: 'Tarjetas', sub: `${cards.length} activa${cards.length !== 1 ? 's' : ''}`, href: '/cards', bg: '#EEF4FF' },
     { icon: '📦', name: 'Cajitas', sub: `${budgets.length} fondo${budgets.length !== 1 ? 's' : ''} activo${budgets.length !== 1 ? 's' : ''}`, href: '/budgets', bg: '#F3EEFF' },
+    { icon: '🤲', name: 'Préstamos', sub: `${givenLoans.length + receivedLoans.length} activo${givenLoans.length + receivedLoans.length !== 1 ? 's' : ''} · ${formatMXN(totalGivenPending)} por cobrar`, href: '/loans', bg: '#ECFDF5' },
     { icon: '🤝', name: 'Te deben', sub: 'Gastos compartidos', href: '/splits', bg: '#ECFEFF' },
     { icon: '📊', name: 'MSI activos', sub: `${activePlans.length} plan${activePlans.length !== 1 ? 'es' : ''} · ${formatMXN(totalMonthlyMSI)}/mes`, href: '/msi', bg: '#FFF3EE' },
   ]
