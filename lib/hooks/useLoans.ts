@@ -27,6 +27,8 @@ export interface LoanPayment {
   due_date: string
   is_paid: boolean
   paid_at: string | null
+  budget_id: string | null
+  budget?: { id: string; name: string; icon: string | null } | null
 }
 
 export function useLoans() {
@@ -98,11 +100,15 @@ export function useLoans() {
     return data
   }
 
-  const markPayment = async (loanId: string, monthNumber: number) => {
+  const markPayment = async (loanId: string, monthNumber: number, budgetId?: string) => {
     const supabase = createClient()
     await supabase
       .from('loan_payments')
-      .update({ is_paid: true, paid_at: new Date().toISOString() })
+      .update({
+        is_paid: true,
+        paid_at: new Date().toISOString(),
+        budget_id: budgetId || null,
+      })
       .eq('loan_id', loanId)
       .eq('month_number', monthNumber)
 
@@ -128,7 +134,7 @@ export function useLoans() {
     const supabase = createClient()
     const { data } = await supabase
       .from('loan_payments')
-      .select('*')
+      .select('*, budget:budgets(id, name, icon)')
       .eq('loan_id', loanId)
       .order('month_number')
 

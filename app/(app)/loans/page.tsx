@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Plus, ArrowUpRight, ArrowDownLeft, Check, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
 import { useLoans, type LoanPayment } from '@/lib/hooks/useLoans'
+import { useBudgets } from '@/lib/hooks/useBudgets'
 import { useContacts } from '@/lib/hooks/useContacts'
 import { formatMXN } from '@/lib/utils/currency'
 import { formatDate } from '@/lib/utils/dates'
@@ -20,11 +21,16 @@ export default function LoansPage() {
     givenLoans, receivedLoans, loading, addLoan, markPayment,
     getPayments, deleteLoan, totalGivenPending, totalReceivedPending,
   } = useLoans()
+  const { budgets, addMovement } = useBudgets()
   const { contacts } = useContacts()
   const [activeTab, setActiveTab] = useState<Tab>('given')
   const [showAddModal, setShowAddModal] = useState(false)
   const [expandedLoan, setExpandedLoan] = useState<string | null>(null)
   const [payments, setPayments] = useState<Record<string, LoanPayment[]>>({})
+  const [payingPayment, setPayingPayment] = useState<{
+    loanId: string; monthNumber: number; amount: number; contactName: string
+  } | null>(null)
+  const [selectedBudgetForPayment, setSelectedBudgetForPayment] = useState('')
 
   // Form state
   const [direction, setDirection] = useState<'given' | 'received'>('given')
@@ -73,11 +79,30 @@ export default function LoansPage() {
     }
   }
 
-  const handleMarkPayment = async (loanId: string, monthNumber: number) => {
-    await markPayment(loanId, monthNumber)
+  const handleStartPayment = (loanId: string, monthNumber: number, amount: number, contactName: string) => {
+    setPayingPayment({ loanId, monthNumber, amount, contactName })
+    setSelectedBudgetForPayment('')
+  }
+
+  const handleConfirmPayment = async () => {
+    if (!payingPayment) return
+    const { loanId, monthNumber, amount, contactName } = payingPayment
+
+    await markPayment(loanId, monthNumber, selectedBudgetForPayment || undefined)
+
+    // Add money to the selected cajita
+    if (selectedBudgetForPayment) {
+      await addMovement(
+        selectedBudgetForPayment,
+        amount,
+        `Pago préstamo: ${contactName} mes ${monthNumber}`
+      )
+    }
+
     // Refresh payments for this loan
     const data = await getPayments(loanId)
     setPayments((prev) => ({ ...prev, [loanId]: data }))
+    setPayingPayment(null)
   }
 
   return (
@@ -211,28 +236,71 @@ export default function LoansPage() {
 
                 {isExpanded && payments[loan.id] && (
                   <div className="mt-3 space-y-1.5">
-                    {payments[loan.id].map((p) => (
-                      <div key={p.id} className="flex items-center gap-3 py-1.5 border-t border-border">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                          p.is_paid ? 'bg-accent-green-bg' : 'bg-bg border border-border'
-                        }`}>
-                          {p.is_paid && <Check size={12} className="text-accent-green" />}
+                    {payments[loan.id].map((p) => {
+                      const isPaying = payingPayment?.loanId === loan.id && payingPayment?.monthNumber === p.month_number
+                      return (
+                        <div key={p.id} className="border-t border-border">
+                          <div className="flex items-center gap-3 py-1.5">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                              p.is_paid ? 'bg-accent-green-bg' : 'bg-bg border border-border'
+                            }`}>
+                              {p.is_paid && <Check size={12} className="text-accent-green" />}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs text-ink">Pago {p.month_number}</p>
+                              <p className="text-[11px] text-ink-3">{formatDate(p.due_date)}</p>
+                            </div>
+                            <p className="text-xs font-display font-bold text-ink">{formatMXN(p.amount)}</p>
+                            {!p.is_paid && !isPaying && (
+                              <button
+                                onClick={() => handleStartPayment(
+                                  loan.id, p.month_number, p.amount,
+                                  loan.contact?.name || loan.contact_name || ''
+                                )}
+                                className="px-3 py-1 rounded-pill bg-accent-green text-white text-[11px] font-display font-bold"
+                              >
+                                Pagar
+                              </button>
+                            )}
+                          </div>
+                          {/* Cajita selector when paying */}
+                          {isPaying && (
+                            <div className="flex items-center gap-2 pb-2 pl-9">
+                              <select
+                                value={selectedBudgetForPayment}
+                                onChange={(e) => setSelectedBudgetForPayment(e.target.value)}
+                                className="flex-1 py-1.5 px-2 rounded-sm border border-border-2 bg-bg font-body text-xs text-ink outline-none"
+                              >
+                                <option value="">Sin cajita</option>
+                                {budgets.map((b) => (
+                                  <option key={b.id} value={b.id}>{b.icon || '📦'} {b.name}</option>
+                                ))}
+                              </select>
+                              <button
+                                onClick={handleConfirmPayment}
+                                className="w-7 h-7 rounded-full bg-accent-green flex items-center justify-center"
+                              >
+                                <Check size={14} className="text-white" />
+                              </button>
+                              <button
+                                onClick={() => setPayingPayment(null)}
+                                className="w-7 h-7 rounded-full bg-bg border border-border flex items-center justify-center"
+                              >
+                                <span className="text-ink-3 text-xs font-bold">✕</span>
+                              </button>
+                            </div>
+                          )}
+                          {/* Show which cajita received the money */}
+                          {p.is_paid && p.budget && (
+                            <div className="pb-1.5 pl-9">
+                              <span className="text-[11px] text-ink-3">
+                                → {p.budget.icon || '📦'} {p.budget.name}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex-1">
-                          <p className="text-xs text-ink">Pago {p.month_number}</p>
-                          <p className="text-[11px] text-ink-3">{formatDate(p.due_date)}</p>
-                        </div>
-                        <p className="text-xs font-display font-bold text-ink">{formatMXN(p.amount)}</p>
-                        {!p.is_paid && (
-                          <button
-                            onClick={() => handleMarkPayment(loan.id, p.month_number)}
-                            className="px-3 py-1 rounded-pill bg-accent-green text-white text-[11px] font-display font-bold"
-                          >
-                            Pagar
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
 
