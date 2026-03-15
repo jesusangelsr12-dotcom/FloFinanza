@@ -24,6 +24,7 @@ export default function BudgetsPage() {
   const [newName, setNewName] = useState('')
   const [newAmount, setNewAmount] = useState('')
   const [newIcon, setNewIcon] = useState('📦')
+  const [newType, setNewType] = useState<'expense' | 'income'>('expense')
   const [selectedGradient, setSelectedGradient] = useState(0)
 
   const totalAccumulated = budgets.reduce((sum, b) => sum + Math.max(0, b.accumulated), 0)
@@ -56,6 +57,7 @@ export default function BudgetsPage() {
       gradient_from: gradient.from,
       gradient_to: gradient.to,
       amount: Number(newAmount),
+      type: newType,
       period_days: settings?.salary_frequency === 'monthly' ? 30
         : settings?.salary_frequency === 'weekly' ? 7
         : settings?.salary_custom_days || 14,
@@ -64,6 +66,7 @@ export default function BudgetsPage() {
     setNewName('')
     setNewAmount('')
     setNewIcon('📦')
+    setNewType('expense')
     setSelectedGradient(0)
   }
 
@@ -118,7 +121,9 @@ export default function BudgetsPage() {
               key={budget.id}
               name={budget.name}
               icon={budget.icon || '📦'}
+              type={budget.type || 'expense'}
               accumulated={budget.accumulated}
+              committed={budget.committed || 0}
               budgetAmount={budget.amount}
               amountPerPeriod={budget.amount}
               periodLabel={periodLabel}
@@ -156,6 +161,32 @@ export default function BudgetsPage() {
           </div>
 
           <div>
+            <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Tipo</label>
+            <div className="flex bg-bg rounded-pill p-1 gap-0.5">
+              <button
+                onClick={() => setNewType('expense')}
+                className={`flex-1 text-center py-2.5 rounded-pill font-display text-sm font-bold transition-all ${
+                  newType === 'expense'
+                    ? 'bg-accent-red text-white'
+                    : 'text-ink-3'
+                }`}
+              >
+                Gasto
+              </button>
+              <button
+                onClick={() => setNewType('income')}
+                className={`flex-1 text-center py-2.5 rounded-pill font-display text-sm font-bold transition-all ${
+                  newType === 'income'
+                    ? 'bg-accent-green text-white'
+                    : 'text-ink-3'
+                }`}
+              >
+                Ingreso
+              </button>
+            </div>
+          </div>
+
+          <div>
             <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Nombre</label>
             <input
               type="text"
@@ -167,7 +198,9 @@ export default function BudgetsPage() {
           </div>
 
           <div>
-            <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">Monto por periodo</label>
+            <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">
+              {newType === 'income' ? 'Meta de ingreso por periodo' : 'Límite de gasto por periodo'}
+            </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3 font-display font-bold">$</span>
               <input

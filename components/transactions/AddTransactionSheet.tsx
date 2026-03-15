@@ -23,11 +23,12 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0])
   const [isShared, setIsShared] = useState(false)
+  const [isCommitted, setIsCommitted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const { addTransaction } = useTransactions()
-  const { budgets, addMovement } = useBudgets()
+  const { budgets, addMovement, addCommitment } = useBudgets()
   const { cards } = useCards()
 
   const amountNum = Number(amount) || 0
@@ -52,6 +53,7 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
     setSelectedDate(new Date().toISOString().split('T')[0])
     setSelectedBudgetId('')
     setIsShared(false)
+    setIsCommitted(false)
   }
 
   const handleSubmit = async () => {
@@ -70,10 +72,14 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
         card_id: selectedCardId || null,
       })
 
-      // Update the budget's accumulated amount if a cajita was selected
+      // Update the budget's accumulated or committed amount if a cajita was selected
       if (selectedBudgetId) {
-        const movementAmount = type === 'expense' ? -amountNum : amountNum
-        await addMovement(selectedBudgetId, movementAmount, description || undefined)
+        if (isCommitted && type === 'expense') {
+          await addCommitment(selectedBudgetId, amountNum, description || undefined)
+        } else {
+          const movementAmount = type === 'expense' ? -amountNum : amountNum
+          await addMovement(selectedBudgetId, movementAmount, description || undefined)
+        }
       }
 
       resetForm()
@@ -280,23 +286,46 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
                 </div>
               </div>
 
-              {/* Shared expense toggle */}
+              {/* Toggles for expense type */}
               {type === 'expense' && (
-                <div className="flex items-center justify-between bg-bg rounded-sm p-3.5 mb-5">
-                  <div>
-                    <div className="font-display text-xs font-bold text-ink-2 mb-0.5">¿Gasto compartido?</div>
-                    <div className="text-xs text-ink-3">Dividir con otras personas</div>
+                <div className="space-y-2 mb-5">
+                  {/* Committed/future expense toggle */}
+                  {selectedBudgetId && (
+                    <div className="flex items-center justify-between bg-bg rounded-sm p-3.5">
+                      <div>
+                        <div className="font-display text-xs font-bold text-ink-2 mb-0.5">¿Gasto programado?</div>
+                        <div className="text-xs text-ink-3">Aún no lo pagas, pero lo vas a pagar</div>
+                      </div>
+                      <button
+                        onClick={() => setIsCommitted(!isCommitted)}
+                        className={`w-11 h-[26px] rounded-full relative transition-colors ${
+                          isCommitted ? 'bg-accent-purple' : 'bg-border-2'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 bg-white rounded-full absolute top-[3px] shadow transition-transform ${
+                          isCommitted ? 'right-[3px]' : 'left-[3px]'
+                        }`} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Shared expense toggle */}
+                  <div className="flex items-center justify-between bg-bg rounded-sm p-3.5">
+                    <div>
+                      <div className="font-display text-xs font-bold text-ink-2 mb-0.5">¿Gasto compartido?</div>
+                      <div className="text-xs text-ink-3">Dividir con otras personas</div>
+                    </div>
+                    <button
+                      onClick={() => setIsShared(!isShared)}
+                      className={`w-11 h-[26px] rounded-full relative transition-colors ${
+                        isShared ? 'bg-ink' : 'bg-border-2'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-[3px] shadow transition-transform ${
+                        isShared ? 'right-[3px]' : 'left-[3px]'
+                      }`} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setIsShared(!isShared)}
-                    className={`w-11 h-[26px] rounded-full relative transition-colors ${
-                      isShared ? 'bg-ink' : 'bg-border-2'
-                    }`}
-                  >
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-[3px] shadow transition-transform ${
-                      isShared ? 'right-[3px]' : 'left-[3px]'
-                    }`} />
-                  </button>
                 </div>
               )}
 

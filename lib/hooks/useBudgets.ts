@@ -12,6 +12,8 @@ interface Budget {
   gradient_to: string | null
   amount: number
   accumulated: number
+  committed: number
+  type: 'expense' | 'income'
   period_days: number
   is_active: boolean
 }
@@ -34,14 +36,14 @@ export function useBudgets() {
     setLoading(false)
   }
 
-  const addBudget = async (budget: Omit<Budget, 'id' | 'accumulated' | 'is_active'>) => {
+  const addBudget = async (budget: Omit<Budget, 'id' | 'accumulated' | 'committed' | 'is_active'>) => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
     const { data, error } = await supabase
       .from('budgets')
-      .insert({ ...budget, user_id: user.id, accumulated: 0, is_active: true })
+      .insert({ ...budget, user_id: user.id, accumulated: 0, committed: 0, is_active: true })
       .select()
       .single()
 
@@ -77,6 +79,32 @@ export function useBudgets() {
     }
   }
 
+  const addCommitment = async (budgetId: string, amount: number, note?: string) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    await supabase.from('budget_movements').insert({
+      budget_id: budgetId,
+      user_id: user.id,
+      amount,
+      note: note ? `[comprometido] ${note}` : '[comprometido]',
+    })
+
+    const budget = budgets.find((b) => b.id === budgetId)
+    if (budget) {
+      const newCommitted = budget.committed + Math.abs(amount)
+      await supabase
+        .from('budgets')
+        .update({ committed: newCommitted, updated_at: new Date().toISOString() })
+        .eq('id', budgetId)
+
+      setBudgets((prev) =>
+        prev.map((b) => b.id === budgetId ? { ...b, committed: newCommitted } : b)
+      )
+    }
+  }
+
   const deleteBudget = async (id: string) => {
     const supabase = createClient()
     await supabase.from('budgets').update({ is_active: false }).eq('id', id)
@@ -87,5 +115,5 @@ export function useBudgets() {
     fetchBudgets()
   }, [])
 
-  return { budgets, loading, addBudget, addMovement, deleteBudget, refresh: fetchBudgets }
+  return { budgets, loading, addBudget, addMovement, addCommitment, deleteBudget, refresh: fetchBudgets }
 }
