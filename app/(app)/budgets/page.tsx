@@ -28,6 +28,7 @@ export default function BudgetsPage() {
   const [selectedGradient, setSelectedGradient] = useState(0)
   const [distributing, setDistributing] = useState(false)
   const [distributed, setDistributed] = useState(false)
+  const [createError, setCreateError] = useState('')
 
   const totalAccumulated = budgets.reduce((sum, b) => sum + Math.max(0, b.amount + b.accumulated), 0)
 
@@ -75,8 +76,9 @@ export default function BudgetsPage() {
 
   const handleCreate = async () => {
     if (!newName.trim() || !newAmount) return
+    setCreateError('')
     const gradient = GRADIENT_PRESETS[selectedGradient]
-    await addBudget({
+    const result = await addBudget({
       name: newName.trim(),
       icon: newIcon,
       color: null,
@@ -88,6 +90,10 @@ export default function BudgetsPage() {
         : settings?.salary_frequency === 'weekly' ? 7
         : settings?.salary_custom_days || 14,
     })
+    if (!result.ok) {
+      setCreateError(result.error || 'No se pudo crear la cajita. Intenta de nuevo.')
+      return
+    }
     setShowNewModal(false)
     setNewName('')
     setNewAmount('')
@@ -291,6 +297,12 @@ export default function BudgetsPage() {
               ))}
             </div>
           </div>
+
+          {createError && (
+            <div className="bg-accent-red-bg border border-accent-red/20 rounded-xl px-4 py-3">
+              <p className="font-body text-[12px] text-accent-red">{createError}</p>
+            </div>
+          )}
 
           <button
             onClick={handleCreate}

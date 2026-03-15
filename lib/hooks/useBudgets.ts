@@ -36,10 +36,10 @@ export function useBudgets() {
     setLoading(false)
   }
 
-  const addBudget = async (budget: Omit<Budget, 'id' | 'accumulated' | 'committed' | 'is_active'>) => {
+  const addBudget = async (budget: Omit<Budget, 'id' | 'accumulated' | 'committed' | 'is_active'>): Promise<{ ok: boolean; error?: string }> => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) return { ok: false, error: 'No has iniciado sesión' }
 
     const { data, error } = await supabase
       .from('budgets')
@@ -47,9 +47,14 @@ export function useBudgets() {
       .select()
       .single()
 
-    if (!error && data) {
+    if (error) {
+      return { ok: false, error: error.message }
+    }
+
+    if (data) {
       setBudgets((prev) => [...prev, data])
     }
+    return { ok: true }
   }
 
   const addMovement = async (budgetId: string, amount: number, note?: string) => {
