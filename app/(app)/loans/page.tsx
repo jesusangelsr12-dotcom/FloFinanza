@@ -372,19 +372,41 @@ export default function LoansPage() {
 
           <Input
             label="Monto total"
-            type="number"
-            placeholder="0"
+            placeholder="5,000"
+            inputMode="numeric"
             value={principal}
-            onChange={(e) => setPrincipal(e.target.value)}
+            onChange={(e) => setPrincipal(e.target.value.replace(/[^0-9]/g, ''))}
           />
 
-          <Input
-            label="Numero de meses"
-            type="number"
-            placeholder="6"
-            value={totalMonths}
-            onChange={(e) => setTotalMonths(e.target.value)}
-          />
+          <div>
+            <label className="font-display text-xs font-bold text-ink-2 mb-1.5 block">¿En cuántos meses?</label>
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 6, 9, 12, 18, 24].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setTotalMonths(String(m))}
+                  className={`px-3.5 py-2 rounded-pill font-display text-sm font-bold transition-all ${
+                    totalMonths === String(m)
+                      ? 'bg-ink text-white'
+                      : 'bg-bg text-ink-3 border border-border-2'
+                  }`}
+                >
+                  {m === 1 ? '1 mes' : `${m} meses`}
+                </button>
+              ))}
+            </div>
+            <div className="mt-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={totalMonths}
+                onChange={(e) => setTotalMonths(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="Otro número de meses"
+                className="w-full p-3.5 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink outline-none focus:border-accent-blue focus:bg-white transition"
+              />
+            </div>
+          </div>
 
           {monthlyPayment > 0 && (
             <div className="bg-bg rounded-sm p-3 text-center">
