@@ -138,13 +138,17 @@ export default function HomePage() {
         <div className="bg-white border border-border rounded-card overflow-hidden">
           {recentTx.map((tx, i) => {
             const { meta, name: categoryName } = resolveCategoryMeta(tx.category_id, dbCategories)
+            const budget = tx.budget_id ? budgets.find((b) => b.id === tx.budget_id) : null
+            const card = tx.card_id ? cards.find((c) => c.id === tx.card_id) : null
+            const metaParts = [categoryName, budget?.name, card?.name].filter(Boolean)
+            const metaText = metaParts.length > 0 ? metaParts.join(' · ') : (tx.type === 'income' ? 'Ingreso' : 'Gasto')
             return (
               <div key={tx.id} className={i < recentTx.length - 1 ? 'border-b border-border' : ''}>
                 <TransactionItem
                   icon={meta.icon}
                   iconBg={meta.bg}
                   name={tx.description || (tx.type === 'income' ? 'Ingreso' : 'Gasto')}
-                  meta={categoryName}
+                  meta={metaText}
                   amount={tx.amount}
                   type={tx.type}
                   date={tx.date}
