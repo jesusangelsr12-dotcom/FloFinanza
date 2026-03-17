@@ -66,7 +66,6 @@ export default function LoansPage() {
         total_months: Number(totalMonths),
         start_date: startDate,
         notes: notes.trim() || undefined,
-        budget_id: selectedBudgetForLoan || undefined,
         budget_name: budgetForLoan ? `${budgetForLoan.icon || '📦'} ${budgetForLoan.name}` : undefined,
       })
 

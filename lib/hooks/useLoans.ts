@@ -16,7 +16,6 @@ export interface Loan {
   start_date: string
   is_completed: boolean
   notes: string | null
-  budget_id: string | null
   created_at: string
   contact?: { id: string; name: string } | null
 }
@@ -69,7 +68,6 @@ export function useLoans() {
     total_months: number
     start_date: string
     notes?: string
-    budget_id?: string
     budget_name?: string
   }) => {
     const supabase = createClient()
@@ -88,7 +86,6 @@ export function useLoans() {
         total_months: loan.total_months,
         start_date: loan.start_date,
         notes: loan.notes || null,
-        budget_id: loan.budget_id || null,
       })
       .select('*')
       .single()
@@ -134,7 +131,6 @@ export function useLoans() {
             ? `Préstamo a ${loan.contact_name} a ${monthsLabel}${budgetLabel}`
             : `Préstamo de ${loan.contact_name} a ${monthsLabel}${budgetLabel}`,
           date: loan.start_date,
-          budget_id: loan.budget_id || null,
         })
       } catch (err) {
         console.error('Error creating loan auxiliaries:', err)
@@ -233,14 +229,6 @@ export function useLoans() {
             .update({ accumulated: budget.accumulated + amount })
             .eq('id', budgetId)
         }
-      }
-
-      // Reverse the initial cajita movement (loan disbursement)
-      if (loan.budget_id) {
-        const reverseAmount = loan.direction === 'given'
-          ? loan.principal   // was subtracted, add back
-          : -loan.principal  // was added, subtract
-        await reverseBudget(loan.budget_id, reverseAmount, `Préstamo eliminado: ${loan.contact_name}`)
       }
 
       // Reverse payment movements that went to cajitas
