@@ -451,7 +451,9 @@ export default function SettingsPage() {
                   <span className="text-lg">{b.icon || '📦'}</span>
                   <div>
                     <div className="font-display text-[13px] font-bold text-ink">{b.name}</div>
-                    <div className="text-[11px] text-ink-3">${b.amount.toLocaleString('es-MX')} / periodo</div>
+                    <div className="text-[11px] text-ink-3">
+                      Saldo: ${(b.accumulated || 0).toLocaleString('es-MX')} / ${b.amount.toLocaleString('es-MX')}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
