@@ -32,6 +32,8 @@ export default function LoansPage() {
   } | null>(null)
   const [selectedBudgetForPayment, setSelectedBudgetForPayment] = useState('')
 
+  const [submitting, setSubmitting] = useState(false)
+
   // Form state
   const [direction, setDirection] = useState<'given' | 'received'>('given')
   const [contactName, setContactName] = useState('')
@@ -49,40 +51,45 @@ export default function LoansPage() {
     : 0
 
   const handleAddLoan = async () => {
-    if (!contactName.trim() || !principal || !totalMonths) return
-    const budgetForLoan = budgets.find((b) => b.id === selectedBudgetForLoan)
-    await addLoan({
-      direction,
-      contact_id: selectedContact || undefined,
-      contact_name: contactName.trim(),
-      principal: Number(principal),
-      monthly_payment: monthlyPayment,
-      total_months: Number(totalMonths),
-      start_date: startDate,
-      notes: notes.trim() || undefined,
-      budget_id: selectedBudgetForLoan || undefined,
-      budget_name: budgetForLoan ? `${budgetForLoan.icon || '📦'} ${budgetForLoan.name}` : undefined,
-    })
+    if (!contactName.trim() || !principal || !totalMonths || submitting) return
+    setSubmitting(true)
+    try {
+      const budgetForLoan = budgets.find((b) => b.id === selectedBudgetForLoan)
+      await addLoan({
+        direction,
+        contact_id: selectedContact || undefined,
+        contact_name: contactName.trim(),
+        principal: Number(principal),
+        monthly_payment: monthlyPayment,
+        total_months: Number(totalMonths),
+        start_date: startDate,
+        notes: notes.trim() || undefined,
+        budget_id: selectedBudgetForLoan || undefined,
+        budget_name: budgetForLoan ? `${budgetForLoan.icon || '📦'} ${budgetForLoan.name}` : undefined,
+      })
 
-    // Deduct/add amount from/to selected cajita
-    if (selectedBudgetForLoan) {
-      const amount = Number(principal)
-      if (direction === 'given') {
-        // I lent money → subtract from my cajita
-        await addMovement(selectedBudgetForLoan, -amount, `Préstamo a ${contactName.trim()}`)
-      } else {
-        // I received a loan → add to my cajita
-        await addMovement(selectedBudgetForLoan, amount, `Préstamo de ${contactName.trim()}`)
+      // Deduct/add amount from/to selected cajita
+      if (selectedBudgetForLoan) {
+        const amount = Number(principal)
+        if (direction === 'given') {
+          await addMovement(selectedBudgetForLoan, -amount, `Préstamo a ${contactName.trim()}`)
+        } else {
+          await addMovement(selectedBudgetForLoan, amount, `Préstamo de ${contactName.trim()}`)
+        }
       }
-    }
 
-    setContactName('')
-    setSelectedContact('')
-    setPrincipal('')
-    setTotalMonths('')
-    setNotes('')
-    setSelectedBudgetForLoan('')
-    setShowAddModal(false)
+      setContactName('')
+      setSelectedContact('')
+      setPrincipal('')
+      setTotalMonths('')
+      setNotes('')
+      setSelectedBudgetForLoan('')
+      setShowAddModal(false)
+    } catch (err) {
+      console.error('Error adding loan:', err)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const togglePayments = async (loanId: string) => {
@@ -477,9 +484,9 @@ export default function LoansPage() {
           <Button
             onClick={handleAddLoan}
             className="w-full"
-            disabled={!contactName.trim() || !principal || !totalMonths}
+            disabled={!contactName.trim() || !principal || !totalMonths || submitting}
           >
-            Registrar prestamo
+            {submitting ? 'Registrando...' : 'Registrar prestamo'}
           </Button>
         </div>
       </Modal>

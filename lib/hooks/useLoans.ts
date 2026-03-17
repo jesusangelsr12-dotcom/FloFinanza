@@ -84,38 +84,43 @@ export function useLoans() {
       .single()
 
     if (!error && data) {
-      // Generate payment schedule
-      const payments = []
-      const startDate = new Date(loan.start_date)
-      for (let i = 1; i <= loan.total_months; i++) {
-        const dueDate = new Date(startDate)
-        dueDate.setMonth(dueDate.getMonth() + i)
-        payments.push({
-          loan_id: data.id,
-          user_id: user.id,
-          month_number: i,
-          amount: loan.monthly_payment,
-          due_date: dueDate.toISOString().split('T')[0],
-        })
-      }
-
-      const { error: payError } = await supabase.from('loan_payments').insert(payments)
-      if (payError) console.error('Error inserting loan payments:', payError)
-
-      // Create transaction: lending = expense, borrowing = income
-      const monthsLabel = `${loan.total_months} mes${loan.total_months !== 1 ? 'es' : ''}`
-      const budgetLabel = loan.budget_name ? ` · Cajita: ${loan.budget_name}` : ''
-      await insertTransaction({
-        type: loan.direction === 'given' ? 'expense' : 'income',
-        amount: loan.principal,
-        description: loan.direction === 'given'
-          ? `Préstamo a ${loan.contact_name} a ${monthsLabel}${budgetLabel}`
-          : `Préstamo de ${loan.contact_name} a ${monthsLabel}${budgetLabel}`,
-        date: loan.start_date,
-        budget_id: loan.budget_id || null,
-      })
-
+      // Update state immediately so the UI reflects the new loan
       setLoans((prev) => [data as Loan, ...prev])
+
+      // Generate payment schedule (non-blocking for UI)
+      try {
+        const payments = []
+        const startDate = new Date(loan.start_date)
+        for (let i = 1; i <= loan.total_months; i++) {
+          const dueDate = new Date(startDate)
+          dueDate.setMonth(dueDate.getMonth() + i)
+          payments.push({
+            loan_id: data.id,
+            user_id: user.id,
+            month_number: i,
+            amount: loan.monthly_payment,
+            due_date: dueDate.toISOString().split('T')[0],
+          })
+        }
+
+        const { error: payError } = await supabase.from('loan_payments').insert(payments)
+        if (payError) console.error('Error inserting loan payments:', payError)
+
+        // Create transaction: lending = expense, borrowing = income
+        const monthsLabel = `${loan.total_months} mes${loan.total_months !== 1 ? 'es' : ''}`
+        const budgetLabel = loan.budget_name ? ` · Cajita: ${loan.budget_name}` : ''
+        await insertTransaction({
+          type: loan.direction === 'given' ? 'expense' : 'income',
+          amount: loan.principal,
+          description: loan.direction === 'given'
+            ? `Préstamo a ${loan.contact_name} a ${monthsLabel}${budgetLabel}`
+            : `Préstamo de ${loan.contact_name} a ${monthsLabel}${budgetLabel}`,
+          date: loan.start_date,
+          budget_id: loan.budget_id || null,
+        })
+      } catch (err) {
+        console.error('Error creating loan auxiliaries:', err)
+      }
     }
     return data
   }
