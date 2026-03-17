@@ -41,11 +41,21 @@ export function useLoans() {
     const supabase = createClient()
     const { data, error } = await supabase
       .from('loans')
-      .select(`*, contact:contacts(id, name)`)
+      .select('*, contact:contacts(id, name)')
       .order('created_at', { ascending: false })
 
     if (!error && data) {
       setLoans(data as Loan[])
+    } else if (error) {
+      console.error('Error fetching loans with contact join:', error)
+      // Fallback: query without the contact join
+      const { data: fallback } = await supabase
+        .from('loans')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (fallback) {
+        setLoans(fallback.map((l) => ({ ...l, contact: null })) as Loan[])
+      }
     }
     setLoading(false)
   }
@@ -80,12 +90,20 @@ export function useLoans() {
         notes: loan.notes || null,
         budget_id: loan.budget_id || null,
       })
-      .select(`*, contact:contacts(id, name)`)
+      .select('*')
       .single()
 
-    if (!error && data) {
+    if (error) {
+      console.error('Error inserting loan:', error)
+      return null
+    }
+
+    if (data) {
+      // Build the loan object with contact info for local state
+      const loanWithContact = { ...data, contact: null } as Loan
+
       // Update state immediately so the UI reflects the new loan
-      setLoans((prev) => [data as Loan, ...prev])
+      setLoans((prev) => [loanWithContact, ...prev])
 
       // Generate payment schedule (non-blocking for UI)
       try {

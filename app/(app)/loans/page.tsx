@@ -55,7 +55,7 @@ export default function LoansPage() {
     setSubmitting(true)
     try {
       const budgetForLoan = budgets.find((b) => b.id === selectedBudgetForLoan)
-      await addLoan({
+      const result = await addLoan({
         direction,
         contact_id: selectedContact || undefined,
         contact_name: contactName.trim(),
@@ -68,7 +68,9 @@ export default function LoansPage() {
         budget_name: budgetForLoan ? `${budgetForLoan.icon || '📦'} ${budgetForLoan.name}` : undefined,
       })
 
-      // Deduct/add amount from/to selected cajita
+      if (!result) return
+
+      // Deduct/add amount from/to selected cajita only if loan was created
       if (selectedBudgetForLoan) {
         const amount = Number(principal)
         if (direction === 'given') {
