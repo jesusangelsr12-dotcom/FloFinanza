@@ -157,10 +157,19 @@ export function BudgetsProvider({ children }: { children: ReactNode }) {
     const movements: { budget_id: string; user_id: string; amount: number; note: string }[] = []
     const updates: { id: string; newAccumulated: number }[] = []
 
-    for (const budget of budgets) {
-      const share = totalBudgeted > 0
-        ? Math.round((budget.amount / totalBudgeted) * salaryAmount * 100) / 100
-        : Math.round((salaryAmount / budgets.length) * 100) / 100
+    let distributed = 0
+    for (let i = 0; i < budgets.length; i++) {
+      const budget = budgets[i]
+      let share: number
+      if (i === budgets.length - 1) {
+        // Last budget gets the remainder to avoid rounding errors
+        share = Math.round((salaryAmount - distributed) * 100) / 100
+      } else {
+        share = totalBudgeted > 0
+          ? Math.round((budget.amount / totalBudgeted) * salaryAmount * 100) / 100
+          : Math.round((salaryAmount / budgets.length) * 100) / 100
+      }
+      distributed += share
 
       movements.push({
         budget_id: budget.id,

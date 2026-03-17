@@ -16,7 +16,8 @@ export function formatDate(date: Date | string): string {
 }
 
 export function daysUntil(date: Date | string): number {
-  const d = typeof date === 'string' ? new Date(date) : date
+  // Parse date strings as local time to avoid timezone offset issues
+  const d = typeof date === 'string' ? new Date(date + 'T00:00:00') : new Date(date)
   const now = new Date()
   now.setHours(0, 0, 0, 0)
   d.setHours(0, 0, 0, 0)

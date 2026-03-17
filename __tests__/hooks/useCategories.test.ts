@@ -96,11 +96,15 @@ describe('useCategories', () => {
       expect(result.current.categories).toHaveLength(2)
     })
 
-    // Setup for delete
+    // Setup for delete (chained .eq().eq() for id + user_id)
     mockFrom.mockImplementation(() => {
       const chain: Record<string, unknown> = {}
       chain.delete = vi.fn().mockReturnValue(chain)
-      chain.eq = vi.fn().mockResolvedValue({ error: null })
+      const eqFn = vi.fn().mockImplementation(() => {
+        const result = { eq: eqFn, then: (resolve: (v: unknown) => void) => resolve({ error: null }) }
+        return result
+      })
+      chain.eq = eqFn
       return chain
     })
 

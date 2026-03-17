@@ -101,7 +101,7 @@ export default function BudgetCard({
             </div>
           </div>
           <div className="bg-accent-green-bg text-accent-green font-display text-[11px] font-bold px-2.5 py-1 rounded-pill">
-            {Math.round((balance / budgetAmount) * 100)}%
+            {Math.min(Math.round((balance / budgetAmount) * 100), 999)}%
           </div>
         </div>
         <div className="font-display text-[26px] font-black text-accent-green tracking-[-1px] mb-3.5">

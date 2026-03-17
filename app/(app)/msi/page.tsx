@@ -37,7 +37,7 @@ export default function MSIPage() {
 
   const displayPlans = activeTab === 'active' ? activePlans : completedPlans
   const monthlyAmount = totalAmount && totalMonths
-    ? Math.ceil(Number(totalAmount) / Number(totalMonths))
+    ? Math.round(Number(totalAmount) / Number(totalMonths) * 100) / 100
     : 0
 
   const handleAddPlan = async () => {

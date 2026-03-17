@@ -44,9 +44,12 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchData = async () => {
       const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setLoading(false); return }
+
       const [txResult, catResult] = await Promise.all([
-        supabase.from('transactions').select('*').order('date', { ascending: false }),
-        supabase.from('categories').select('*'),
+        supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+        supabase.from('categories').select('*').eq('user_id', user.id),
       ])
       if (txResult.data) setTransactions(txResult.data)
       if (catResult.data) setCategories(catResult.data)

@@ -95,7 +95,7 @@ export function useLoans() {
 
     if (error) {
       console.error('Error inserting loan:', error)
-      return null
+      throw new Error(error.message)
     }
 
     if (data) {
