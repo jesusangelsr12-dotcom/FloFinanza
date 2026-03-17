@@ -5,13 +5,15 @@ import Link from 'next/link'
 import TransactionItem from '@/components/transactions/TransactionItem'
 import { useTransactions } from '@/lib/context/TransactionsContext'
 import { useBudgets } from '@/lib/context/BudgetsContext'
+import { useCards } from '@/lib/hooks/useCards'
 import { useCategories } from '@/lib/hooks/useCategories'
 import { formatDate } from '@/lib/utils/dates'
 import { resolveCategoryMeta } from '@/lib/utils/categories'
 
 export default function TransactionsPage() {
   const { transactions, loading, deleteTransaction } = useTransactions()
-  const { addMovement } = useBudgets()
+  const { budgets, addMovement } = useBudgets()
+  const { cards } = useCards()
   const { categories: dbCategories } = useCategories()
 
   const handleDelete = async (tx: typeof transactions[0]) => {
@@ -61,13 +63,17 @@ export default function TransactionsPage() {
               <div className="bg-white border border-border rounded-card overflow-hidden">
                 {grouped[dateKey].map((tx, i) => {
                   const { meta, name: categoryName } = resolveCategoryMeta(tx.category_id, dbCategories)
+                  const budget = tx.budget_id ? budgets.find((b) => b.id === tx.budget_id) : null
+                  const card = tx.card_id ? cards.find((c) => c.id === tx.card_id) : null
+                  const metaParts = [categoryName, budget?.name, card?.name].filter(Boolean)
+                  const metaText = metaParts.length > 0 ? metaParts.join(' · ') : (tx.type === 'income' ? 'Ingreso' : 'Gasto')
                   return (
                     <div key={tx.id} className={i < grouped[dateKey].length - 1 ? 'border-b border-border' : ''}>
                       <TransactionItem
                         icon={meta.icon}
                         iconBg={meta.bg}
                         name={tx.description || (tx.type === 'income' ? 'Ingreso' : 'Gasto')}
-                        meta={categoryName}
+                        meta={metaText}
                         amount={tx.amount}
                         type={tx.type}
                         date={tx.date}
