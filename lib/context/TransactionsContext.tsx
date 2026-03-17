@@ -31,11 +31,17 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
 
   const fetchTransactions = useCallback(async () => {
     const supabase = createClient()
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    const monthStart = startOfMonth.toISOString().split('T')[0]
+
+    // Fetch all transactions from this month (for accurate balance)
+    // plus recent ones for display
     const { data, error } = await supabase
       .from('transactions')
       .select('*')
+      .gte('date', monthStart)
       .order('date', { ascending: false })
-      .limit(20)
 
     if (!error && data) {
       setTransactions(data)
