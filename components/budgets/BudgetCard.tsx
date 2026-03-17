@@ -29,13 +29,13 @@ export default function BudgetCard({
   gradientTo,
   onClick,
 }: BudgetCardProps) {
-  // Real balance = budget base + sum of all movements
-  // accumulated only tracks the delta (movements), budgetAmount is the starting point
-  const balance = budgetAmount + accumulated
+  // Real balance = only what has actually accumulated (salary distributions, movements)
+  // budgetAmount is the limit/goal per period, NOT part of the balance
+  const balance = accumulated
   const isOverdrawn = balance < 0
   const isGoalExceeded = type === 'income' && balance > budgetAmount
 
-  // Progress: how much of the budget remains
+  // Progress: how much of the budget has been filled
   const fillPercentage = budgetAmount > 0
     ? Math.min(Math.round((Math.max(0, balance) / budgetAmount) * 100), 100)
     : 0

@@ -452,7 +452,7 @@ export default function SettingsPage() {
                   <div>
                     <div className="font-display text-[13px] font-bold text-ink">{b.name}</div>
                     <div className="text-[11px] text-ink-3">
-                      Saldo: ${(b.amount + (b.accumulated || 0)).toLocaleString('es-MX')} / ${b.amount.toLocaleString('es-MX')}
+                      Saldo: ${(b.accumulated || 0).toLocaleString('es-MX')} / ${b.amount.toLocaleString('es-MX')}
                     </div>
                   </div>
                 </div>
