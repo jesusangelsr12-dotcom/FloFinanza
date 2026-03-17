@@ -57,7 +57,7 @@ export function useMSI() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    const monthlyAmount = Math.ceil(plan.total_amount / plan.total_months)
+    const monthlyAmount = Math.round(plan.total_amount / plan.total_months * 100) / 100
 
     const { data, error } = await supabase
       .from('installment_plans')

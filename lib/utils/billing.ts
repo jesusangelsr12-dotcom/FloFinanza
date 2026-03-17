@@ -44,9 +44,18 @@ export function getBillingPeriod(cutDay: number, referenceDate: Date = new Date(
     // We're in the period that ends this month on cut_day
     endDate = clampDay(year, month, cutDay)
     // Period started on cut_day+1 of previous month
-    const prevMonth = month === 0 ? 11 : month - 1
-    const prevYear = month === 0 ? year - 1 : year
-    startDate = clampDay(prevYear, prevMonth, cutDay + 1)
+    // Use Date arithmetic to correctly handle month boundaries
+    const prevDate = new Date(year, month, 0) // last day of previous month
+    const prevMonth = prevDate.getMonth()
+    const prevYear = prevDate.getFullYear()
+    const prevMaxDay = prevDate.getDate()
+    const startDay = Math.min(cutDay + 1, prevMaxDay + 1)
+    // If cutDay+1 exceeds prev month days, start on 1st of current month
+    if (startDay > prevMaxDay) {
+      startDate = new Date(year, month, 1)
+    } else {
+      startDate = new Date(prevYear, prevMonth, startDay)
+    }
   } else {
     // We're past the cut_day, so we're in the period that ends next month
     const nextMonth = month === 11 ? 0 : month + 1

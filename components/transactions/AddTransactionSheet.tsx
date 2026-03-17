@@ -34,9 +34,14 @@ export default function AddTransactionSheet({ isOpen, onClose }: AddTransactionS
   const amountNum = Number(amount) || 0
 
   const handleAmountChange = (value: string) => {
-    const cleaned = value.replace(/[^0-9]/g, '')
-    if (cleaned.length <= 10) {
-      setAmount(cleaned)
+    const cleaned = value.replace(/[^0-9.]/g, '')
+    // Allow only one decimal point
+    const parts = cleaned.split('.')
+    const sanitized = parts.length > 2
+      ? parts[0] + '.' + parts.slice(1).join('')
+      : cleaned
+    if (sanitized.replace('.', '').length <= 10) {
+      setAmount(sanitized)
     }
   }
 

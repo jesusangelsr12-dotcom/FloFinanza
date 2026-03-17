@@ -27,9 +27,12 @@ export function useCategories() {
 
   const fetchAll = async () => {
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setLoading(false); return }
+
     const [catsRes, groupsRes] = await Promise.all([
-      supabase.from('categories').select('*').order('name'),
-      supabase.from('category_groups').select('*').order('name'),
+      supabase.from('categories').select('*').eq('user_id', user.id).order('name'),
+      supabase.from('category_groups').select('*').eq('user_id', user.id).order('name'),
     ])
 
     if (catsRes.data) setCategories(catsRes.data)
@@ -71,7 +74,9 @@ export function useCategories() {
 
   const deleteCategory = async (id: string) => {
     const supabase = createClient()
-    const { error } = await supabase.from('categories').delete().eq('id', id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase.from('categories').delete().eq('id', id).eq('user_id', user.id)
     if (!error) {
       setCategories((prev) => prev.filter((c) => c.id !== id))
     }

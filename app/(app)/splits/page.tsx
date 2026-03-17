@@ -208,7 +208,7 @@ export default function SplitsPage() {
               onChange={(e) => {
                 setSelectedTransaction(e.target.value)
                 const tx = transactions.find((t) => t.id === e.target.value)
-                if (tx) setSplitAmount(String(Math.round(tx.amount / 2)))
+                if (tx) setSplitAmount(String(Math.round(tx.amount / 2 * 100) / 100))
               }}
               className="w-full p-3.5 rounded-sm border border-border-2 bg-bg font-body text-sm text-ink outline-none"
             >

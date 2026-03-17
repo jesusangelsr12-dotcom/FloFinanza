@@ -16,9 +16,13 @@ export function useContacts() {
 
   const fetchContacts = async () => {
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setLoading(false); return }
+
     const { data, error } = await supabase
       .from('contacts')
       .select('*')
+      .eq('user_id', user.id)
       .order('name')
 
     if (!error && data) {
@@ -46,7 +50,9 @@ export function useContacts() {
 
   const deleteContact = async (id: string) => {
     const supabase = createClient()
-    await supabase.from('contacts').delete().eq('id', id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('contacts').delete().eq('id', id).eq('user_id', user.id)
     setContacts((prev) => prev.filter((c) => c.id !== id))
   }
 

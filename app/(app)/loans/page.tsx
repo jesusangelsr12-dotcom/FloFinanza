@@ -33,6 +33,7 @@ export default function LoansPage() {
   const [selectedBudgetForPayment, setSelectedBudgetForPayment] = useState('')
 
   const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
 
   // Form state
   const [direction, setDirection] = useState<'given' | 'received'>('given')
@@ -47,12 +48,13 @@ export default function LoansPage() {
   const displayLoans = activeTab === 'given' ? givenLoans : receivedLoans
 
   const monthlyPayment = principal && totalMonths
-    ? Math.ceil(Number(principal) / Number(totalMonths))
+    ? Math.round(Number(principal) / Number(totalMonths) * 100) / 100
     : 0
 
   const handleAddLoan = async () => {
     if (!contactName.trim() || !principal || !totalMonths || submitting) return
     setSubmitting(true)
+    setFormError('')
     try {
       const budgetForLoan = budgets.find((b) => b.id === selectedBudgetForLoan)
       const result = await addLoan({
@@ -68,7 +70,10 @@ export default function LoansPage() {
         budget_name: budgetForLoan ? `${budgetForLoan.icon || '📦'} ${budgetForLoan.name}` : undefined,
       })
 
-      if (!result) return
+      if (!result) {
+        setFormError('No se pudo registrar el préstamo. Verifica los datos e intenta de nuevo.')
+        return
+      }
 
       // Deduct/add amount from/to selected cajita only if loan was created
       if (selectedBudgetForLoan) {
@@ -86,9 +91,11 @@ export default function LoansPage() {
       setTotalMonths('')
       setNotes('')
       setSelectedBudgetForLoan('')
+      setFormError('')
       setShowAddModal(false)
     } catch (err) {
       console.error('Error adding loan:', err)
+      setFormError(err instanceof Error ? err.message : 'Error inesperado al registrar el préstamo.')
     } finally {
       setSubmitting(false)
     }
@@ -144,7 +151,7 @@ export default function LoansPage() {
         <h1 className="font-display text-[22px] font-extrabold text-ink">Prestamos</h1>
         <div className="flex-1" />
         <button
-          onClick={() => { setDirection(activeTab); setShowAddModal(true) }}
+          onClick={() => { setDirection(activeTab); setFormError(''); setShowAddModal(true) }}
           className="w-10 h-10 rounded-full bg-ink flex items-center justify-center shadow-card"
         >
           <Plus size={18} className="text-white" />
@@ -480,6 +487,12 @@ export default function LoansPage() {
                   <option key={b.id} value={b.id}>{b.icon || '📦'} {b.name}</option>
                 ))}
               </select>
+            </div>
+          )}
+
+          {formError && (
+            <div className="bg-accent-red-bg border border-accent-red/20 rounded-xl px-4 py-3">
+              <p className="font-body text-[12px] text-accent-red">{formError}</p>
             </div>
           )}
 

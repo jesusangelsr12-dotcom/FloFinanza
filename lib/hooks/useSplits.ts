@@ -22,6 +22,9 @@ export function useSplits() {
 
   const fetchSplits = async () => {
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setLoading(false); return }
+
     const { data, error } = await supabase
       .from('transaction_splits')
       .select(`
@@ -29,6 +32,7 @@ export function useSplits() {
         contact:contacts(id, name, phone),
         transaction:transactions(id, description, date, amount)
       `)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (!error && data) {
@@ -95,7 +99,9 @@ export function useSplits() {
 
   const deleteSplit = async (id: string) => {
     const supabase = createClient()
-    await supabase.from('transaction_splits').delete().eq('id', id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('transaction_splits').delete().eq('id', id).eq('user_id', user.id)
     setSplits((prev) => prev.filter((s) => s.id !== id))
   }
 
