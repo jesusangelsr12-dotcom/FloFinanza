@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { mockSupabaseQuery, mockFrom, mockAuth } from '../setup'
+import React from 'react'
 
-import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useBudgets, BudgetsProvider } from '@/lib/context/BudgetsContext'
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(BudgetsProvider, null, children)
 
 describe('useBudgets', () => {
   beforeEach(() => {
@@ -19,7 +23,7 @@ describe('useBudgets', () => {
     ]
     mockSupabaseQuery(budgets)
 
-    const { result } = renderHook(() => useBudgets())
+    const { result } = renderHook(() => useBudgets(), { wrapper })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -31,7 +35,7 @@ describe('useBudgets', () => {
   it('should add a budget with is_active=true', async () => {
     mockSupabaseQuery([])
 
-    const { result } = renderHook(() => useBudgets())
+    const { result } = renderHook(() => useBudgets(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     const newBudget = {
@@ -69,7 +73,7 @@ describe('useBudgets', () => {
     ]
     mockSupabaseQuery(budgets)
 
-    const { result } = renderHook(() => useBudgets())
+    const { result } = renderHook(() => useBudgets(), { wrapper })
     await waitFor(() => expect(result.current.budgets).toHaveLength(1))
 
     let updatedWith: Record<string, unknown> = {}
@@ -94,7 +98,7 @@ describe('useBudgets', () => {
     ]
     mockSupabaseQuery(budgets)
 
-    const { result } = renderHook(() => useBudgets())
+    const { result } = renderHook(() => useBudgets(), { wrapper })
     await waitFor(() => expect(result.current.budgets).toHaveLength(1))
 
     // Mock for insert + update
@@ -119,7 +123,7 @@ describe('useBudgets', () => {
 
   it('should not add budget if user is not authenticated', async () => {
     mockSupabaseQuery([])
-    const { result } = renderHook(() => useBudgets())
+    const { result } = renderHook(() => useBudgets(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     mockAuth.getUser.mockResolvedValue({ data: { user: null } })

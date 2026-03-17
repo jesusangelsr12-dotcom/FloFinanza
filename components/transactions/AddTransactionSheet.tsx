@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronDown, CalendarDays } from 'lucide-react'
 import CategoryPicker from './CategoryPicker'
-import { useTransactions } from '@/lib/hooks/useTransactions'
-import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useTransactions } from '@/lib/context/TransactionsContext'
+import { useBudgets } from '@/lib/context/BudgetsContext'
 import { useCards } from '@/lib/hooks/useCards'
 
 interface AddTransactionSheetProps {

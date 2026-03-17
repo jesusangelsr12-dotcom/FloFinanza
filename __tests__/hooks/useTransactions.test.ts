@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { mockSupabaseQuery, mockFrom, mockAuth } from '../setup'
+import React from 'react'
 
-import { useTransactions } from '@/lib/hooks/useTransactions'
+import { useTransactions, TransactionsProvider } from '@/lib/context/TransactionsContext'
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(TransactionsProvider, null, children)
 
 describe('useTransactions', () => {
   beforeEach(() => {
@@ -19,7 +23,7 @@ describe('useTransactions', () => {
     ]
     mockSupabaseQuery(txs)
 
-    const { result } = renderHook(() => useTransactions())
+    const { result } = renderHook(() => useTransactions(), { wrapper })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -30,7 +34,7 @@ describe('useTransactions', () => {
 
   it('should add a transaction and prepend to list', async () => {
     mockSupabaseQuery([])
-    const { result } = renderHook(() => useTransactions())
+    const { result } = renderHook(() => useTransactions(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     const newTx = {
@@ -61,7 +65,7 @@ describe('useTransactions', () => {
 
   it('should throw error if user not authenticated', async () => {
     mockSupabaseQuery([])
-    const { result } = renderHook(() => useTransactions())
+    const { result } = renderHook(() => useTransactions(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     mockAuth.getUser.mockResolvedValue({ data: { user: null } })

@@ -5,7 +5,7 @@ import { ArrowLeft, DollarSign, Tag, Package, CreditCard, Plus, Trash2, X, Calen
 import Link from 'next/link'
 import { useSalary } from '@/lib/hooks/useSalary'
 import { useCategories } from '@/lib/hooks/useCategories'
-import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useBudgets } from '@/lib/context/BudgetsContext'
 import { useCards } from '@/lib/hooks/useCards'
 import Modal from '@/components/ui/Modal'
 

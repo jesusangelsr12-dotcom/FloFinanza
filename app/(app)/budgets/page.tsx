@@ -4,7 +4,7 @@ import { useState } from 'react'
 import BudgetCard from '@/components/budgets/BudgetCard'
 import Modal from '@/components/ui/Modal'
 import { formatMXN } from '@/lib/utils/currency'
-import { useBudgets } from '@/lib/hooks/useBudgets'
+import { useBudgets } from '@/lib/context/BudgetsContext'
 import { useSalary } from '@/lib/hooks/useSalary'
 import { frequencyLabel, daysUntil } from '@/lib/utils/dates'
 
