@@ -52,13 +52,14 @@ vi.mock('@/lib/hooks/useCategories', () => ({
   }),
 }))
 
-vi.mock('@/lib/hooks/useBudgets', () => ({
+vi.mock('@/lib/context/BudgetsContext', () => ({
   useBudgets: () => ({
     budgets: [
       { id: 'b1', name: 'Despensa', icon: '🛒', color: null, amount: 3000, accumulated: 1200, period_days: 14, is_active: true },
     ],
     loading: false,
     deleteBudget: mockDeleteBudget,
+    resetBudget: vi.fn().mockResolvedValue({ ok: true }),
   }),
 }))
 
