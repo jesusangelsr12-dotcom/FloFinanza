@@ -141,15 +141,37 @@ export function useLoans() {
 
   const markPayment = async (loanId: string, monthNumber: number, budgetId?: string, budgetName?: string) => {
     const supabase = createClient()
-    await supabase
+
+    // Build update payload — only include budget_id if provided
+    const updatePayload: Record<string, unknown> = {
+      is_paid: true,
+      paid_at: new Date().toISOString(),
+    }
+    if (budgetId) updatePayload.budget_id = budgetId
+
+    const { error: updateError } = await supabase
       .from('loan_payments')
-      .update({
-        is_paid: true,
-        paid_at: new Date().toISOString(),
-        budget_id: budgetId || null,
-      })
+      .update(updatePayload)
       .eq('loan_id', loanId)
       .eq('month_number', monthNumber)
+
+    if (updateError) {
+      console.error('Error marking payment:', updateError)
+      // Retry without budget_id in case column doesn't exist
+      if (budgetId) {
+        const { error: retryError } = await supabase
+          .from('loan_payments')
+          .update({ is_paid: true, paid_at: new Date().toISOString() })
+          .eq('loan_id', loanId)
+          .eq('month_number', monthNumber)
+        if (retryError) {
+          console.error('Error marking payment (retry):', retryError)
+          throw new Error(retryError.message)
+        }
+      } else {
+        throw new Error(updateError.message)
+      }
+    }
 
     // Update paid_months on loan
     const loan = loans.find((l) => l.id === loanId)

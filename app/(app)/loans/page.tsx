@@ -121,23 +121,28 @@ export default function LoansPage() {
     if (!payingPayment) return
     const { loanId, monthNumber, amount, contactName } = payingPayment
 
-    const budgetForPayment = budgets.find((b) => b.id === selectedBudgetForPayment)
-    const budgetNameForPayment = budgetForPayment ? `${budgetForPayment.icon || '📦'} ${budgetForPayment.name}` : undefined
-    await markPayment(loanId, monthNumber, selectedBudgetForPayment || undefined, budgetNameForPayment)
+    try {
+      const budgetForPayment = budgets.find((b) => b.id === selectedBudgetForPayment)
+      const budgetNameForPayment = budgetForPayment ? `${budgetForPayment.icon || '📦'} ${budgetForPayment.name}` : undefined
+      await markPayment(loanId, monthNumber, selectedBudgetForPayment || undefined, budgetNameForPayment)
 
-    // Add money to the selected cajita
-    if (selectedBudgetForPayment) {
-      await addMovement(
-        selectedBudgetForPayment,
-        amount,
-        `Pago préstamo: ${contactName} mes ${monthNumber}`
-      )
+      // Add money to the selected cajita
+      if (selectedBudgetForPayment) {
+        await addMovement(
+          selectedBudgetForPayment,
+          amount,
+          `Pago préstamo: ${contactName} mes ${monthNumber}`
+        )
+      }
+
+      // Refresh payments for this loan
+      const data = await getPayments(loanId)
+      setPayments((prev) => ({ ...prev, [loanId]: data }))
+      setPayingPayment(null)
+    } catch (err) {
+      console.error('Error confirming payment:', err)
+      setFormError(err instanceof Error ? err.message : 'Error al registrar el pago.')
     }
-
-    // Refresh payments for this loan
-    const data = await getPayments(loanId)
-    setPayments((prev) => ({ ...prev, [loanId]: data }))
-    setPayingPayment(null)
   }
 
   return (
